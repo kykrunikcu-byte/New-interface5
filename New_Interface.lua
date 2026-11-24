@@ -213,6 +213,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]=]
 local IconPNG = {
+    -- Lucide v0.456.0 circle-check.svg, rasterized at 96x96 with transparent background.
+    ["circle-check"] = [=[iVBORw0KGgoAAAANSUhEUgAAAGAAAABgBAMAAAAQtmoLAAAAMFBMVEX///////////////////////////////////////////////////////////////9Or7hAAAAAEHRSTlMAESIzRFVmd4iZqrvM3e7/dpUBFQAAAx1JREFUeNrdmLtrFFEUh8/Oxrx8bSMEBA0KWgR0SZuQpLASNFpICkWtBR9N6kT/gYh1NBZ2gkZEbISkSZFCksZHYdzgElBBNvGtyc5nMa97596Z2QtWOdXM2fObc88597xWZHuSNzb9suG/WxzvbU38SoOQ/OfVYvmjNRRq3iqSv0CKFvLlr2LQmzz5a1jodbb8IFZ6qsqUlefOFft3jpTm7f5cij65ON5fKR0em47et+wBuRj+/PZsxNl3N2St2eQ7wmA9UJknQ8QNC2AqkL+jc3uCsP8x5buDT91M83sC/n0D8Nj0YEB9APxNs7sA+Gkz7joAt1PcCYCm9XKWawC/dOYOAJ7YA7cfgDMa75j1nJp9HzTWku2YuoFbKqczV0GoYlJhDAPMZgN2AnxTGHNAs5INKNWAzeS9Pf0Bg4Z1P+0GuJwHaAdY1mK5mZ/sc9o9qBWdKDhTUwvzZD6gUzViF+BX8gGlBhCl9nHgd1GFmwK+Ks8bRYADyo2tWTPKkpGh1WWAkSJAG0BvXC6a9kr16HNSkRpxcLszbR5Ss2AmPvge4Ls1Nxvqnb8ErMZe3chQgB+/HQz86olURWTJpkBP8S9B6fZEekVk2QIYqIhIkphNEfFiwGqWgo/xu18EGKiICKfTgLBiVA3flxsAdUVjXDlqcQjDClWPXISvlEIvjm8DqKgVxa9aFEgpdjKAaDegblGgyJkAv2oqUOSMI0HdoiA5kmE0+BYFidG6W8vJLKN3i9Ctnsi6BMELb8Bo9LSm3xdPRBDxgigrnXthPbTxlBgA3waIVKQUpADqcQMVaQVSDu+TJYGGTBclCRSm6I90avpGQw1T1AtypE39qTlqWiAyIiLzGWVGKy9mmXEuZM6lUivMLRVj53LfckOZdWhZXVrfdW2K7m23uLF36I3deXRwHk7cxx/nAct5hHMfEp3HUOdBN2+UnrCO0jKTNawP2od193XAeeGIVhpaXmnipelTsjTdy1ua3Ney4EbZKDN9+1pYLQuXXXj1P9djkfNp+Wf/e8Uv/BOhZIOcO9F/aO/7lRcPV7fn/zD/AGNIFJc181OWAAAAAElFTkSuQmCC]=],
     ["house"] = [=[iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAMFBMVEX///////////////////////////////////////////////////////////////9Or7hAAAAAEHRSTlMAESIzRFVmd4iZqrvM3e7/dpUBFQAAAQlJREFUeAFjoASwnv8TgE2c6fz//38UsEjY/geCy1gMAon//49pWP3//4u0/v//ji7O9f//DwaG/v//F6DZvB5sCtC8X6j26/7/fxVEx/7/fwlZnPn+/79glUxAhgGSRPz//4cgLJ3//78ixNmBRsPYQMsK4BJATgOMzYGkCOh8JO1AYxdBnQq0EMnDrDCHMPCgORHo9APQwEANVGAwQwJmPXowcEGt//8fLRaY/v+HSqCHKHESTL2geLoBNhVFAuhIEAA7HEUCGEcgAIwtNIn7EIm/GBKY5KgENglQakUSYoZKrAdnMCQJW2hiACY9dABJmMDMhA6g6QmYplEBLFWzosn8wsy6tAEADU5OOKHdzyEAAAAASUVORK5CYII=]=],
     ["contact-round"] = [=[iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAMFBMVEX///////////////////////////////////////////////////////////////9Or7hAAAAAEHRSTlMAESIzRFVmd4iZqrvM3e7/dpUBFQAAASZJREFUeAFjIBvEXkWl4eD+X1QaDv7/R6XxS7Cu/48CfgVAJdDEgTIQcS508f//F4Al4jElvkJNuozqEFuoWf//G6BKMEOdhuF0mAhBCYv7f5uxScSCnAMJQhQJVohDwZ5GkYB6H+xQZAmgE38FgAIN5HRkCZ7/f4GmsN7/fwBNIv7/ZxDbHhwayBLrIQHHBbYEVQLsHlYMif//FUBsJiiHCAmcRuG0HKdzcXoQZ5DgDERYImrACN37UB0g76C6CgouoUqA4m+pAnPN//9/gVqQJIAamkBsG7AWJIn70FQJdNwPZAkOaCoAO84ASYL//3d4ngMGGkIi/v8FmIT9/w8ICYP1EI+BAO//r7BEDcwGSAme4/8vWDbAmXFwZjWcmRN3diYNAACHurQBxbCXRAAAAABJRU5ErkJggg==]=],
     ["user-round-cog"] = [=[iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAMFBMVEX///////////////////////////////////////////////////////////////9Or7hAAAAAEHRSTlMAESIzRFVmd4iZqrvM3e7/dpUBFQAAATdJREFUeAFjoCNgqrr/Zzk28f7/QPBDAUMiHiT+//9VdHFWiPj//wGYGq4HMNf+//8VzYb7/7+D6Pr/f1Ft4YCaATSxAUVCH6IBpOUTmhUXIAxemAooWP+/AMJg//8LReL/fwOYs/+gSWCyCEngMAqn5Tidi9ODOIMEZyDiDHbcEQV0MPaotYVqALo6FIwQroKABQxc/xcAEcxRQIP+lDIwhK9SYOAHyX+ASugCUxQ0sIB+h5gIBuf//4WJQ1wBDTCgDYugwlx/IXbdB9tijwhSoEf/FrDfh3r0/v9LSBJANtBOkATQ13AbuP6DYoYd5G4GBp7/P5DjEhiKTJAI1v//GbtE/P8DcHEUo+ARjm75eaSwRnEuclJC8SBqGkMKkvt/kSWQAjEWJdpQgh0ZoEQUCkCJWpIAAEq/El0TcwDhAAAAAElFTkSuQmCC]=],
@@ -256,7 +258,7 @@ local IconVector = {
     ["minus"] = {{5,12,19,12}},
     ["plus"] = {{5,12,19,12},{12,5,12,19}},
     ["x"] = {{18,6,6,18},{6,6,18,18}},
-    ["circle-check"] = {{22,12,21.51,15.09,20.09,17.88,17.88,20.09,15.09,21.51,12,22,8.91,21.51,6.12,20.09,3.91,17.88,2.49,15.09,2,12,2.49,8.91,3.91,6.12,6.12,3.91,8.91,2.49,12,2,15.09,2.49,17.88,3.91,20.09,6.12,21.51,8.91,22,12},{9,12,11,14,15,10}},
+    ["circle-check"] = {{9,12,11,14,15,10}},
     ["house"] = {{15,21,15,13,14,12,9.29,12.29,9,21},{3,10,3.71,8.47,10.71,2.47,11.54,2.05,13.29,2.47,20.81,9.16,20.73,20.01,19,21,3.99,20.73,3,19,3,10}},
     ["contact-round"] = {{16,2,16,4},{17.92,22,17.44,19.67,16.16,17.76,14.25,16.47,11.92,16,9.58,16.47,7.67,17.76,6.39,19.67,5.92,22},{8,2,8,4},{16,12,15.06,14.57,12.7,15.94,10,15.46,8.24,13.37,8,12,8.94,9.43,11.31,8.06,14,8.54,15.76,10.63,16,12},{5,4,19,4,20.73,4.99,21,20,20.01,21.73,5,22,3.27,21.01,3,6,3.27,4.99,5,4}},
     ["user-round-cog"] = {{2,21,2.87,17.38,5.28,14.54,8.72,13.1,12.43,13.38},{15,8,14.82,9.35,13.41,11.65,11.02,12.9,9.66,12.99,7.12,12.09,6.12,11.16,5.05,8.68,5.41,6.01,6.12,4.85,7.12,3.92,9.66,3.01,11.02,3.11,13.41,4.35,14.82,6.65,15,8},{21,18,20.7,19.3,18.67,20.93,16.13,20.35,15,18,15.3,16.7,17.33,15.08,19.87,15.66,21,18},{19.5,14.3,19.1,15.2},{16.9,20.8,16.5,21.7},{21.7,19.5,20.8,19.1},{15.2,16.9,14.3,16.5},{21.7,16.5,20.8,16.9},{15.2,19.1,14.3,19.5},{19.5,21.7,19.1,20.8},{16.9,15.2,16.5,14.3}},
@@ -328,6 +330,12 @@ end
 -- Compact native fallback using the same library contours.
 local function drawFallback(holder,key,size,ink)
     local k=size/24; local width=2*k
+    -- A native circular outline replaces the old polygon when PNG is unavailable.
+    if key=="circle-check" then
+        local ring=new("Frame",{Name="CircularOutline",AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(20*k,20*k),BackgroundTransparency=1,BorderSizePixel=0,Active=false,ZIndex=holder.ZIndex},holder)
+        new("UICorner",{CornerRadius=UDim.new(.5,0)},ring)
+        new("UIStroke",{Color=ink,Thickness=width,Transparency=0,ApplyStrokeMode=Enum.ApplyStrokeMode.Border},ring)
+    end
     for _,path in ipairs(IconVector[key] or {}) do
         for i=1,#path-2,2 do
             local x1,y1,x2,y2=path[i],path[i+1],path[i+2],path[i+3]
@@ -402,7 +410,24 @@ do
         corner(toast,8)
         stroke(toast,C.line,.35,1)
         local iconHost=new("Frame",{Position=UDim2.fromOffset(14,12),Size=UDim2.fromOffset(32,32),BackgroundTransparency=1,BorderSizePixel=0,Active=false,ZIndex=81},toast)
-        nativeSymbol(iconHost,"circle-check",30,"SuccessIcon",green)
+        -- v32: original Lucide PNG, with a smooth native fallback until loaded.
+        local fallback=nativeSymbol(iconHost,"circle-check",30,"SuccessIcon",green)
+        local uri=getIconUri("circle-check")
+        if uri then
+            local ok,image=pcall(function()
+                return new("ImageLabel",{Name="SuccessLibraryPNG",AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(30,30),BackgroundTransparency=1,BorderSizePixel=0,Image=uri,ImageColor3=green,ImageTransparency=0,ScaleType=Enum.ScaleType.Fit,Active=false,Visible=false,ZIndex=iconHost.ZIndex+1},iconHost)
+            end)
+            if ok and image then
+                local function revealLoadedIcon()
+                    if image.Parent and image.IsLoaded then
+                        fallback.Visible=false
+                        image.Visible=true
+                    end
+                end
+                image:GetPropertyChangedSignal("IsLoaded"):Connect(revealLoadedIcon)
+                revealLoadedIcon()
+            end
+        end
         new("Frame",{Name="IconDivider",Position=UDim2.fromOffset(56,12),Size=UDim2.fromOffset(2,32),BackgroundColor3=Color3.fromRGB(133,135,142),BorderSizePixel=0,Active=false,ZIndex=81},toast)
         new("TextLabel",{Name="Message",Position=UDim2.fromOffset(70,0),Size=UDim2.new(1,-82,0,56),BackgroundTransparency=1,Text=message,TextColor3=C.text,Font=Enum.Font.GothamMedium,TextSize=23,TextScaled=false,TextTruncate=Enum.TextTruncate.AtEnd,TextXAlignment=Enum.TextXAlignment.Left,Active=false,ZIndex=81},toast)
         local track=new("Frame",{Name="ProgressTrack",Position=UDim2.new(0,8,1,-7),Size=UDim2.new(1,-16,0,3),BackgroundColor3=Color3.fromRGB(65,67,73),BorderSizePixel=0,Active=false,ZIndex=81,ClipsDescendants=true},toast)
@@ -417,6 +442,8 @@ do
         for _,object in ipairs(toast:GetDescendants()) do
             if object:IsA("UIStroke") then
                 addTarget(object,"Transparency")
+            elseif object:IsA("ImageLabel") then
+                addTarget(object,"ImageTransparency")
             elseif object:IsA("TextLabel") then
                 addTarget(object,"TextTransparency")
                 if object.BackgroundTransparency<1 then addTarget(object,"BackgroundTransparency") end
