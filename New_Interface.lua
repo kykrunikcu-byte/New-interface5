@@ -928,7 +928,7 @@ local function buildPlayerPage()
         {name='Прыжок',kind='up',desc='Изменяет высоту прыжка.',label='Высота прыжка',default=50,max=150,manualMax=1000},
         {name='Гравитация',kind='down',desc='Изменение гравитации.',label='Гравитация',default=196.2,max=500,manualMax=100000},
         {name='Ходьба по стенам',kind='wall',desc='Передвижение по стенам.'},
-        {name='Свободная камера',kind='camera',desc='Свободный обзор карты.',group='Утилиты'},
+        {name='Свободная камера',kind='camera',desc='Свободный обзор карты.',group='Утилиты',label='Скорость камеры',default=50,max=2000,sliderOnly=true},
         {name='Бессмертие',kind='heart',desc='Функция пока не подключена.',unavailable=true},
     }
     local states, cards, outlines={}, {}, {}
@@ -970,7 +970,11 @@ local function buildPlayerPage()
     local thumb=new('Frame',{Name='SliderThumb',AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(0,.5),Size=UDim2.fromOffset(25,25),BackgroundColor3=C.text,BorderSizePixel=0},rail); corner(thumb,13)
     local valueCard=avatarCard(controls,'SliderValue',306,41,76,44,false); valueCard.BackgroundColor3=C.side
     local valueLabel=avatarText(valueCard,'Value','60',0,0,76,44,22,true,true,false)
-    txt(controls,'ManualHeading','Ввести вручную',0,98,382,32,21,false,true,false)
+    local manualHeading=txt(controls,'ManualHeading','Ввести вручную',0,98,382,32,21,false,true,false)
+    local rangeMin=txt(controls,'SliderMinimum','0',11,89,50,22,16,false,true,false)
+    local rangeMax=txt(controls,'SliderMaximum','2000',213,89,70,22,16,false,true,false)
+    rangeMax.TextXAlignment=Enum.TextXAlignment.Right
+    rangeMin.Visible=false; rangeMax.Visible=false
     local inputBg=avatarCard(controls,'ManualBackground',0,136,382,48,false); inputBg.BackgroundColor3=C.side
     local input=new('TextBox',{Name='ManualValue',Position=UDim2.fromOffset(12,0),Size=UDim2.new(1,-24,1,0),BackgroundTransparency=1,Text='60',TextColor3=C.text,PlaceholderText='Введите число',PlaceholderColor3=muted,Font=Enum.Font.GothamMedium,TextSize=23,TextScaled=false,TextXAlignment=Enum.TextXAlignment.Left,ClearTextOnFocus=false},inputBg)
     local note=txt(controls,'PreviewNotice','Настройки пока демонстрационные.',0,193,382,40,17,false,true,true)
@@ -1008,6 +1012,10 @@ local function buildPlayerPage()
         while title.TextSize>18 and avatarTextService:GetTextSize(d.name,title.TextSize,Enum.Font.GothamMedium,Vector2.new(10000,40)).X>228 do title.TextSize=title.TextSize-1 end
         toggle.Visible=not d.unavailable; reset.Visible=not d.unavailable and d.name~='NoClip'
         controls.Visible=d.max~=nil; noSettings.Visible=d.max==nil
+        local sliderOnly=d.sliderOnly==true
+        manualHeading.Visible=not sliderOnly; inputBg.Visible=not sliderOnly
+        rangeMin.Visible=sliderOnly; rangeMax.Visible=sliderOnly
+        note.Position=UDim2.fromOffset(0,sliderOnly and 121 or 193)
         noSettings.Text=d.unavailable and 'Функция пока не подключена.' or 'Дополнительных настроек нет.'
         fieldTitle.Text=d.label or ''; input.Text=s.manual
         refreshValue(); refreshToggle(false)
@@ -1028,7 +1036,7 @@ local function buildPlayerPage()
     end)
     input.FocusLost:Connect(function()
         local d,s=defs[current],states[current]
-        if not d.max then return end
+        if not d.max or d.sliderOnly or not d.manualMax then return end
         local n=tonumber(input.Text)
         if n and n==n and n>=0 and n<=d.manualMax then
             s.value=math.floor(n+.5); s.manual=tostring(s.value)
