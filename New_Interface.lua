@@ -1214,8 +1214,108 @@ minimize.MouseButton1Click:Connect(function()
         resize()
     end
 end)
-close.MouseButton1Click:Connect(function()
-    if viewportConnection then viewportConnection:Disconnect() end
-    if cameraConnection then cameraConnection:Disconnect() end
-    gui:Destroy()
-end)
+-- v33: Classic Minimal confirmation. Separate overlay remains usable
+-- even when the main window is collapsed or dragged near the screen edge.
+do
+    local backdrop=new("TextButton",{
+        Name="CloseConfirmationOverlay",Size=UDim2.fromScale(1,1),
+        BackgroundColor3=Color3.new(0,0,0),BackgroundTransparency=1,
+        BorderSizePixel=0,Text="",AutoButtonColor=false,Active=true,
+        Selectable=false,Visible=false,ZIndex=100,
+    },gui)
+    local host=new("Frame",{
+        Name="CloseConfirmationHost",AnchorPoint=Vector2.new(.5,.5),
+        Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(420,212),
+        BackgroundTransparency=1,BorderSizePixel=0,ZIndex=101,
+    },backdrop)
+    local responsiveScale=new("UIScale",{Scale=1},host)
+    local dialog=new("Frame",{
+        Name="CloseConfirmationDialog",AnchorPoint=Vector2.new(.5,.5),
+        Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(1,1),
+        BackgroundColor3=C.slot,BorderSizePixel=0,Active=true,ZIndex=102,
+    },host)
+    corner(dialog,10)
+    stroke(dialog,C.line,.32,1)
+    local appearScale=new("UIScale",{Scale=1},dialog)
+    new("TextLabel",{
+        Name="Title",Position=UDim2.fromOffset(20,14),Size=UDim2.fromOffset(380,38),
+        BackgroundTransparency=1,Text="Закрыть HORIZON?",TextColor3=C.text,
+        Font=Enum.Font.GothamBold,TextSize=28,
+        TextXAlignment=Enum.TextXAlignment.Left,ZIndex=103,
+    },dialog)
+    new("TextLabel",{
+        Name="Description",Position=UDim2.fromOffset(20,61),Size=UDim2.fromOffset(380,52),
+        BackgroundTransparency=1,Text="Вы действительно хотите закрыть интерфейс?",
+        TextColor3=Color3.fromRGB(180,181,188),Font=Enum.Font.Gotham,
+        TextSize=21,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Left,
+        TextYAlignment=Enum.TextYAlignment.Top,ZIndex=103,
+    },dialog)
+    new("Frame",{
+        Name="Divider",Position=UDim2.fromOffset(20,126),Size=UDim2.fromOffset(380,1),
+        BackgroundColor3=C.line,BackgroundTransparency=.45,BorderSizePixel=0,ZIndex=103,
+    },dialog)
+    local function action(name,caption,x,color)
+        local button=new("TextButton",{
+            Name=name,AnchorPoint=Vector2.new(.5,.5),
+            Position=UDim2.fromOffset(x,167),Size=UDim2.fromOffset(184,50),
+            BackgroundColor3=color,BorderSizePixel=0,Text=caption,
+            TextColor3=C.text,Font=Enum.Font.GothamMedium,TextSize=23,
+            AutoButtonColor=false,ZIndex=104,
+        },dialog)
+        corner(button,8)
+        return button
+    end
+    local cancel=action("Cancel","Отмена",112,Color3.fromRGB(69,71,77))
+    local confirm=action("Confirm","Закрыть",308,Color3.fromRGB(87,49,55))
+    local busy=false
+    local function fitDialog()
+        local bounds=backdrop.AbsoluteSize
+        if bounds.X<=0 or bounds.Y<=0 then return end
+        local scale=math.min(uiScale.Scale,math.max(.1,(bounds.X-24)/420),math.max(.1,(bounds.Y-24)/212))
+        responsiveScale.Scale=scale
+        local center=window.AbsolutePosition+window.AbsoluteSize/2-backdrop.AbsolutePosition
+        local halfW,halfH=210*scale,106*scale
+        host.Position=UDim2.fromOffset(
+            math.clamp(center.X,halfW,bounds.X-halfW),
+            math.clamp(center.Y,halfH,bounds.Y-halfH))
+    end
+    backdrop:GetPropertyChangedSignal("AbsoluteSize"):Connect(fitDialog)
+    uiScale:GetPropertyChangedSignal("Scale"):Connect(fitDialog)
+    window:GetPropertyChangedSignal("AbsolutePosition"):Connect(fitDialog)
+    window:GetPropertyChangedSignal("AbsoluteSize"):Connect(fitDialog)
+    local function animate(transparency,scale,duration)
+        local info=TweenInfo.new(duration,Enum.EasingStyle.Sine,Enum.EasingDirection.Out)
+        TweenService:Create(backdrop,info,{BackgroundTransparency=transparency}):Play()
+        TweenService:Create(appearScale,info,{Scale=scale}):Play()
+    end
+    local function finish(shouldClose)
+        if busy or not backdrop.Visible then return end
+        busy=true
+        animate(1,.94,.20)
+        task.delay(.24,function()
+            if not gui.Parent then return end
+            if shouldClose then
+                -- Preserve the original shutdown path; only confirmation invokes it.
+                if viewportConnection then viewportConnection:Disconnect() end
+                if cameraConnection then cameraConnection:Disconnect() end
+                gui:Destroy()
+            else
+                backdrop.Visible=false
+                busy=false
+            end
+        end)
+    end
+    softPreview(cancel,function() finish(false) end)
+    softPreview(confirm,function() finish(true) end)
+    close.MouseButton1Click:Connect(function()
+        if busy or backdrop.Visible or not gui.Parent then return end
+        dragging=false
+        dragInput=nil
+        dragStart=nil
+        backdrop.BackgroundTransparency=1
+        appearScale.Scale=.94
+        fitDialog()
+        backdrop.Visible=true
+        animate(.40,1,.20)
+    end)
+end
