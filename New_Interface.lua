@@ -785,9 +785,6 @@ local function buildPlayerPage()
     local input=new('TextBox',{Name='ManualValue',Position=UDim2.fromOffset(12,0),Size=UDim2.new(1,-24,1,0),BackgroundTransparency=1,Text='60',TextColor3=C.text,PlaceholderText='Введите число',PlaceholderColor3=muted,Font=Enum.Font.GothamMedium,TextSize=23,TextScaled=false,TextXAlignment=Enum.TextXAlignment.Left,ClearTextOnFocus=false},inputBg)
     local note=txt(controls,'PreviewNotice','Настройки пока демонстрационные.',0,193,382,40,17,false,true,true)
     local noSettings=txt(detail,'NoNumericSettings','Дополнительных настроек нет.',16,150,382,72,21,false,true,true)
-    local enableButton=avatarCard(detail,'EnableButton',16,406,185,54,true); enableButton.BackgroundColor3=selectedColor
-    icon(enableButton,'play',12,14,26)
-    local enableText=txt(enableButton,'Caption','Вкл/Выкл',47,0,130,54,21,true,false,false)
     local reset=avatarCard(detail,'ResetButton',213,406,185,54,true); reset.BackgroundColor3=selectedColor
     icon(reset,'reset',12,14,26); txt(reset,'Caption','Сброс',48,0,130,54,21,true,false,false)
     local current=1
@@ -805,7 +802,6 @@ local function buildPlayerPage()
     local function refreshToggle(animate)
         local on=states[current].enabled
         showPlayerToggle(on,animate)
-        enableText.Text=on and 'Выключить' or 'Включить'
     end
     local function choose(i)
         if input:IsFocused() then input:ReleaseFocus() end
@@ -820,7 +816,7 @@ local function buildPlayerPage()
         title.Text=d.name; description.Text=d.desc
         title.TextSize=29
         while title.TextSize>18 and avatarTextService:GetTextSize(d.name,title.TextSize,Enum.Font.GothamMedium,Vector2.new(10000,40)).X>228 do title.TextSize=title.TextSize-1 end
-        toggle.Visible=not d.unavailable; enableButton.Visible=not d.unavailable; reset.Visible=not d.unavailable
+        toggle.Visible=not d.unavailable; reset.Visible=not d.unavailable and d.name~='NoClip'
         controls.Visible=d.max~=nil; noSettings.Visible=d.max==nil
         noSettings.Text=d.unavailable and 'Функция пока не подключена.' or 'Дополнительных настроек нет.'
         fieldTitle.Text=d.label or ''; input.Text=s.manual
@@ -833,7 +829,7 @@ local function buildPlayerPage()
         if defs[current].unavailable then return end
         states[current].enabled=not states[current].enabled; refreshToggle(true)
     end
-    softPreview(toggle,flip); softPreview(enableButton,flip)
+    softPreview(toggle,flip)
     softPreview(reset,function()
         local d,s=defs[current],states[current]
         s.enabled=false; s.value=d.default or 0; s.manual=tostring(s.value); input.Text=s.manual
