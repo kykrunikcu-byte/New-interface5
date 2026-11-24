@@ -254,6 +254,10 @@ local IconPNG = {
     ["hat"] = [=[iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAMFBMVEX///////////////////////////////////////////////////////////////9Or7hAAAAAEHRSTlMAESIzRFVmd4iZqrvM3e7/dpUBFQAAAL1JREFUeAFjGAVgEHsVh8T9/6RKxH/FKsza9f//igBMcY3/YNCELs4BEf//vwFVnOk8TOKPAoqE7v//f1sVmCLu//9/CUXD/f9/C0AMdiADWQvP//+LICyt//8PIEn0//8FY67//wPJpP//F8DYXP//I8ziQDIYaB3Cxfz/vyO01///gAik/xcQErz/EUHWj+xfDiTb1/9HCjxWhAsZkB0CciKSBHIwkCsRCwtuZABJACRI/MVlFK50NwqwAgAGsre9i7ZqwAAAAABJRU5ErkJggg==]=],
 }
 local IconVector = {
+    -- Native line fallbacks for the three new Home utility icons.
+    ["clock"] = {{12,2,15.83,2.76,19.07,4.93,21.24,8.17,22,12,21.24,15.83,19.07,19.07,15.83,21.24,12,22,8.17,21.24,4.93,19.07,2.76,15.83,2,12,2.76,8.17,4.93,4.93,8.17,2.76,12,2},{12,6,12,12,16,14}},
+    ["save"] = {{19,21,5,21,3,19,3,5,5,3,17,3,21,7,21,19,19,21},{7,3,7,9,15,9,15,3},{7,21,7,13,17,13,17,21}},
+    ["lock"] = {{5,11,19,11,21,13,21,20,19,22,5,22,3,20,3,13,5,11},{7,11,7,7,7.4,5.1,8.5,3.6,10.1,2.4,12,2,13.9,2.4,15.5,3.6,16.6,5.1,17,7,17,11},{12,15,12,18}},
     -- Lucide v0.456.0: minus, plus, x, circle-check (native lightweight paths).
     ["minus"] = {{5,12,19,12}},
     ["plus"] = {{5,12,19,12},{12,5,12,19}},
@@ -546,7 +550,7 @@ local details=label(history,'• Новая боковая навигация\n�
 local modalScale=new('UIScale',{Scale=1},modal)
 -- Home language selector: visual preview only; no localization or persistence yet.
 do
-    local language=panel(home,0,0,.5,76,true)
+    local language=panel(home,0,0,1,76,true)
     language.Name='LanguageButton'
     language.Position=UDim2.fromOffset(12,430)
     local glyph=homeIcon(language,'globe',0,18,40)
@@ -694,6 +698,82 @@ local function softPreview(button,callback)
         tween:Play()
     end)
 end
+-- Home utilities: visual preview only, using the existing card and switch styles.
+do
+    local function buildHomeUtilities()
+        local definitions={
+            {id="AntiAFK",title="Анти-AFK",description="Защита от отключения за бездействие.",icon="clock"},
+            {id="AutoSave",title="Автосохранение",description="Сохранение и восстановление настроек всех функций.",icon="save"},
+            {id="ShiftLock",title="Shift Lock Switch",description="Плавающая кнопка фиксации камеры.",icon="lock"},
+        }
+        local firstY,step,height=518,88,76
+        for i,definition in ipairs(definitions) do
+            local card=panel(home,0,0,1,height,false)
+            card.Name="Home"..definition.id.."Card"
+            card.Position=UDim2.fromOffset(12,firstY+(i-1)*step)
+            local glyph=libraryIcon(card,definition.icon,UDim2.fromOffset(14,18),40,definition.id.."Icon")
+            local title=label(card,definition.title,64,7,1,28,23,true)
+            title.Name="Title"
+            title.Size=UDim2.new(1,-164,0,28)
+            local description=label(card,definition.description,64,35,1,34,17,false)
+            description.Name="Description"
+            description.Size=UDim2.new(1,-164,0,34)
+            description.TextWrapped=true
+            description.TextTruncate=Enum.TextTruncate.None
+            local toggle=avatarCard(card,"Toggle",0,0,80,36,true)
+            toggle.AnchorPoint=Vector2.new(1,.5)
+            toggle.Position=UDim2.new(1,-12,.5,0)
+            local paint=compactCheck(toggle,80,36)
+            local enabled=false
+            toggle:SetAttribute("PreviewEnabled",enabled)
+            softPreview(toggle,function()
+                enabled=not enabled
+                toggle:SetAttribute("PreviewEnabled",enabled)
+                paint(enabled,true)
+            end)
+            -- Keep the standard landscape proportions; wrap labels in the narrow layout.
+            local function fit()
+                local narrow=window.Size.X.Offset<650
+                if narrow then
+                    glyph.Position=UDim2.fromOffset(8,18)
+                    -- Scale from the existing icon holder's native 40px geometry.
+                    local iconScale=glyph:FindFirstChildOfClass("UIScale")
+                    if not iconScale then iconScale=new("UIScale",{Scale=.7},glyph) end
+                    iconScale.Scale=.7
+                    title.Position=UDim2.fromOffset(42,4)
+                    title.Size=UDim2.new(1,-134,0,32)
+                    title.TextSize=14
+                    title.TextWrapped=true
+                    title.TextTruncate=Enum.TextTruncate.None
+                    description.Position=UDim2.fromOffset(42,36)
+                    description.Size=UDim2.new(1,-134,0,36)
+                    description.TextSize=11
+                    toggle.Position=UDim2.new(1,-6,.5,0)
+                else
+                    glyph.Position=UDim2.fromOffset(14,18)
+                    local iconScale=glyph:FindFirstChildOfClass("UIScale")
+                    if iconScale then iconScale.Scale=1 end
+                    title.Position=UDim2.fromOffset(64,7)
+                    title.Size=UDim2.new(1,-164,0,28)
+                    title.TextSize=23
+                    title.TextWrapped=false
+                    title.TextTruncate=Enum.TextTruncate.AtEnd
+                    description.Position=UDim2.fromOffset(64,35)
+                    description.Size=UDim2.new(1,-164,0,34)
+                    description.TextSize=17
+                    toggle.Position=UDim2.new(1,-12,.5,0)
+                end
+            end
+            local resizeConnection=window:GetPropertyChangedSignal("Size"):Connect(fit)
+            card.Destroying:Connect(function() resizeConnection:Disconnect() end)
+            fit()
+        end
+        -- Preserve the original scroll container and include a bottom margin.
+        home.CanvasSize=UDim2.fromOffset(0,firstY+(#definitions-1)*step+height+12)
+    end
+    buildHomeUtilities()
+end
+
 -- Existing Soft Press animation, without replacing the control callbacks.
 softPreview(minimize)
 softPreview(close)
