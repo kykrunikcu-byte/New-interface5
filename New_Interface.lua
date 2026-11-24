@@ -1100,68 +1100,79 @@ local function buildESPPage()
     local colors={Color3.fromRGB(89,228,133),Color3.fromRGB(245,87,97),Color3.fromRGB(105,184,255),Color3.fromRGB(245,245,245),Color3.fromRGB(255,204,110),Color3.fromRGB(185,150,255)}
     local hexColors={'#59E485','#F55761','#69B8FF','#F5F5F5','#FFCC6E','#B996FF'}
     local modes={'Неон','Баланс','Радуга RGB'}
-    local states,cards,outlines,toggles,switchVisuals={},{},{},{},{}
+    local states,cards,outlines={},{},{}
     local current=1
     for i,d in ipairs(defs) do
         states[i]={enabled=false,mode=i==1 and 2 or 1,color=i==2 and 2 or 1,checks={true,true,true}}
-        local b=avatarCard(canvas,'ESPOption'..i,12,94+(i-1)*108,296,98,false)
-        b.BackgroundColor3=C.slot; cards[i]=b; outlines[i]=b:FindFirstChildOfClass('UIStroke'); b.Active=false
-        local selectArea=new('TextButton',{Name='SelectArea',Size=UDim2.fromOffset(222,98),BackgroundTransparency=1,Text='',AutoButtonColor=false},b)
-        icon(selectArea,d[3],12,28,40)
-        local title=txt(selectArea,'Title',d[1],62,10,158,34,23,true,false)
+        -- Like Player, the entire left card selects a function; it never enables it.
+        local b=avatarCard(canvas,'ESPOption'..i,12,94+(i-1)*108,296,98,true)
+        b.BackgroundColor3=C.slot; cards[i]=b; outlines[i]=b:FindFirstChildOfClass('UIStroke')
+        icon(b,d[3],12,28,40)
+        local title=txt(b,'Title',d[1],62,10,222,34,23,true,false)
         local size=23
-        while size>19 and avatarTextService:GetTextSize(d[1],size,Enum.Font.GothamMedium,Vector2.new(10000,34)).X>158 do size=size-1 end
+        while size>19 and avatarTextService:GetTextSize(d[1],size,Enum.Font.GothamMedium,Vector2.new(10000,34)).X>222 do size=size-1 end
         title.TextSize=size
-        local desc=txt(selectArea,'Description',d[2],62,44,153,44,18,false,true)
+        local desc=txt(b,'Description',d[2],62,44,222,44,18,false,true)
         desc.TextWrapped=true; desc.TextTruncate=Enum.TextTruncate.None
-        local t=avatarCard(b,'EnableToggle',230,32,54,30,true); toggles[i]=t
-        switchVisuals[i]=compactCheck(t,54,30)
         b:SetAttribute('OptionIndex',i)
     end
-    local detail=avatarCard(canvas,'ESPSettings',320,94,388,470,false); detail.BackgroundColor3=C.side
-    local title=txt(detail,'Title','',14,8,360,35,23,true,false)
-    thin(detail,14,49,360)
-    local settings=new('Frame',{Name='TargetSettings',Size=UDim2.fromScale(1,1),BackgroundTransparency=1},detail)
-    txt(settings,'DataTitle','Отображение данных',14,64,360,32,21,true,false)
+    local detail=avatarCard(canvas,'ESPSettings',320,94,388,470,false); detail.BackgroundColor3=C.slot
+    local symbol,symbolIndex
+    local title=txt(detail,'Title','',62,14,220,40,25,true,false)
+    local description=txt(detail,'Description','',14,62,360,43,19,false,true)
+    description.TextWrapped=true; description.TextTruncate=Enum.TextTruncate.None
+    local toggle=avatarCard(detail,'EnableToggle',294,20,80,36,true)
+    local showESPToggle=compactCheck(toggle,80,36)
+    thin(detail,14,112,360)
+    -- Settings occupy their own area below the common header.
+    local settings=new('Frame',{Name='TargetSettings',Position=UDim2.fromOffset(0,122),Size=UDim2.new(1,0,1,-122),BackgroundTransparency=1},detail)
+    txt(settings,'DataTitle','Отображение данных',14,0,360,32,21,true,false)
     local checks={}
     local function refreshChecks()
         for i,c in ipairs(checks) do local on=states[current].checks[i]; c.square.BackgroundColor3=on and selectedColor or C.content; c.mark.Visible=on end
         checks[1].label.Text=current==2 and 'Имя NPC' or 'Никнейм'
     end
     for i,name in ipairs({'Никнейм','Расстояние','Здоровье'}) do
-        local y=106+(i-1)*51
-        local b=new('TextButton',{Name='Check'..i,Position=UDim2.fromOffset(14,y),Size=UDim2.fromOffset(360,44),BackgroundTransparency=1,Text='',AutoButtonColor=false},settings)
-        local square=avatarCard(b,'Square',0,8,28,28,false)
+        local y=36+(i-1)*43
+        local b=new('TextButton',{Name='Check'..i,Position=UDim2.fromOffset(14,y),Size=UDim2.fromOffset(360,40),BackgroundTransparency=1,Text='',AutoButtonColor=false},settings)
+        local square=avatarCard(b,'Square',0,6,28,28,false)
         local mark=icon(square,'check',4,4,20)
-        local label=txt(b,'Caption',name,42,0,310,44,21,false,false)
+        local label=txt(b,'Caption',name,42,0,310,40,21,false,false)
         checks[i]={square=square,mark=mark,label=label}
         b.Activated:Connect(function() if current>2 then return end; states[current].checks[i]=not states[current].checks[i]; refreshChecks() end)
     end
-    thin(settings,14,266,360)
-    txt(settings,'ModeTitle','Стиль подсветки',14,278,196,42,20,false,false)
-    local mode=avatarCard(settings,'ModeSelect',207,278,167,42,true); mode.BackgroundColor3=C.slot
+    thin(settings,14,169,360)
+    txt(settings,'ModeTitle','Стиль подсветки',14,181,196,42,20,false,false)
+    local mode=avatarCard(settings,'ModeSelect',207,181,167,42,true); mode.BackgroundColor3=C.side
     local modeLabel=txt(mode,'Caption','',9,0,128,42,19,false,false); icon(mode,'chevron',139,11,20)
-    txt(settings,'ColorTitle','Цвет ESP',14,333,196,42,20,false,false)
-    local color=avatarCard(settings,'ColorSelect',207,333,167,42,true); color.BackgroundColor3=C.slot
+    txt(settings,'ColorTitle','Цвет ESP',14,236,196,42,20,false,false)
+    local color=avatarCard(settings,'ColorSelect',207,236,167,42,true); color.BackgroundColor3=C.side
     local swatch=new('Frame',{Position=UDim2.fromOffset(10,8),Size=UDim2.fromOffset(26,26),BackgroundColor3=colors[1],BorderSizePixel=0},color); corner(swatch,5)
     local colorLabel=txt(color,'Caption','',45,0,90,42,17,false,false); icon(color,'chevron',139,11,20)
-    local summary=txt(detail,'Summary','',14,67,360,85,21,false,true)
+    local summary=txt(detail,'Summary','Дополнительных настроек нет.',14,138,360,72,21,false,true)
     summary.TextWrapped=true; summary.TextTruncate=Enum.TextTruncate.None; summary.TextYAlignment=Enum.TextYAlignment.Top
     local popup=nil
     local function hidePopup() if popup then popup:Destroy(); popup=nil end end
-    local function refresh()
-        local s=states[current]
-        title.Text=defs[current][4]
+    local function refresh(animateToggle)
+        local s,d=states[current],defs[current]
+        if symbolIndex~=current then
+            if symbol then symbol:Destroy() end
+            symbol=icon(detail,d[3],14,14,40)
+            symbolIndex=current
+        end
+        title.Text=d[1]
+        title.TextSize=25
+        while title.TextSize>18 and avatarTextService:GetTextSize(title.Text,title.TextSize,Enum.Font.GothamMedium,Vector2.new(10000,40)).X>220 do title.TextSize=title.TextSize-1 end
+        description.Text=current==3 and 'Поиск предметов и мест их применения.'
+            or current==4 and 'Убирает туман и осветляет карту.' or d[4]
         for i,b in ipairs(cards) do
             b.BackgroundColor3=i==current and selectedColor or C.slot
             outlines[i].Transparency=i==current and .16 or .65
-            switchVisuals[i](states[i].enabled,true)
         end
+        showESPToggle(s.enabled,animateToggle==true)
         settings.Visible=current<=2; summary.Visible=current>2
         if current<=2 then
             modeLabel.Text=modes[s.mode]; swatch.BackgroundColor3=colors[s.color]; colorLabel.Text=hexColors[s.color]; refreshChecks()
-        else
-            summary.Text=current==3 and 'Поиск предметов и мест их применения.' or 'Убирает туман и осветляет карту.'
         end
     end
     local function openPicker(kind)
@@ -1169,14 +1180,14 @@ local function buildESPPage()
         local same=popup and popup.Name==kind
         hidePopup(); if same then return end
         if kind=='ModePicker' then
-            popup=avatarCard(settings,kind,207,165,167,111,false); popup.BackgroundColor3=C.header; popup.ZIndex=10
+            popup=avatarCard(settings,kind,207,68,167,111,false); popup.BackgroundColor3=C.header; popup.ZIndex=10
             for i,v in ipairs(modes) do
                 local b=avatarCard(popup,'Choice'..i,5,4+(i-1)*35,157,32,true); b.BackgroundColor3=C.slot
                 txt(b,'Caption',v,8,0,141,32,19,false,false)
                 b.Activated:Connect(function() states[current].mode=i; hidePopup(); refresh() end)
             end
         else
-            popup=avatarCard(settings,kind,207,229,167,100,false); popup.BackgroundColor3=C.header; popup.ZIndex=10
+            popup=avatarCard(settings,kind,207,134,167,100,false); popup.BackgroundColor3=C.header; popup.ZIndex=10
             for i,v in ipairs(colors) do
                 local b=avatarCard(popup,'Color'..i,8+((i-1)%3)*51,8+math.floor((i-1)/3)*45,43,39,true); b.BackgroundColor3=v
                 b.Activated:Connect(function() states[current].color=i; hidePopup(); refresh() end)
@@ -1184,9 +1195,13 @@ local function buildESPPage()
         end
     end
     for i,b in ipairs(cards) do
-        softPreview(b:FindFirstChild('SelectArea'),function() hidePopup(); current=i; refresh() end)
-        toggles[i].Activated:Connect(function() hidePopup(); states[i].enabled=not states[i].enabled; refresh() end)
+        softPreview(b,function() hidePopup(); current=i; refresh(false) end)
     end
+    softPreview(toggle,function()
+        hidePopup()
+        states[current].enabled=not states[current].enabled
+        showESPToggle(states[current].enabled,true)
+    end)
     softPreview(mode,function() openPicker('ModePicker') end)
     softPreview(color,function() openPicker('ColorPicker') end)
     page:GetPropertyChangedSignal('Visible'):Connect(function() if not page.Visible then hidePopup() end end)
