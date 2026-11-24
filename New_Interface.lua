@@ -932,54 +932,52 @@ local function buildPlayerPage()
         {name='Бессмертие',kind='heart',desc='Функция пока не подключена.',unavailable=true},
     }
     local states, cards, outlines={}, {}, {}
-    local list=new('ScrollingFrame',{Name='PlayerOptionsScroll',Position=UDim2.fromOffset(12,72),Size=UDim2.fromOffset(280,476),BackgroundTransparency=1,BorderSizePixel=0,CanvasSize=UDim2.fromOffset(0,0),ScrollingDirection=Enum.ScrollingDirection.Y,ScrollBarThickness=4,ScrollBarImageColor3=C.line,ClipsDescendants=true},canvas)
+    local list=new('ScrollingFrame',{Name='PlayerOptionsScroll',Position=UDim2.fromOffset(12,72),Size=UDim2.fromOffset(304,476),BackgroundTransparency=1,BorderSizePixel=0,CanvasSize=UDim2.fromOffset(0,0),ScrollingDirection=Enum.ScrollingDirection.Y,ScrollBarThickness=4,ScrollBarImageColor3=C.line,ClipsDescendants=true},canvas)
     local y=0
     for i,d in ipairs(defs) do
         if d.group then
-            txt(list,'UtilityHeading',d.group,8,y,252,34,23,true,false,false)
+            txt(list,'UtilityHeading',d.group,8,y,280,34,23,true,false,false)
             y=y+42
         end
         states[i]={enabled=false,value=d.default or 0,manual=tostring(d.default or 0)}
-        local b=avatarCard(list,'PlayerOption'..i,0,y,270,110,true)
-        y=y+122
+        -- Match ESP v36 card geometry, typography and icon alignment.
+        local b=avatarCard(list,'PlayerOption'..i,0,y,296,98,true)
+        y=y+108
         b.BackgroundColor3=C.slot; cards[i]=b; outlines[i]=b:FindFirstChildOfClass('UIStroke')
-        icon(b,d.kind,13,30,47)
-        local caption=txt(b,'Title',d.name,72,10,188,33,25,true,false,false)
-        if avatarTextService:GetTextSize(d.name,25,Enum.Font.GothamMedium,Vector2.new(10000,33)).X>188 then
-            caption.TextWrapped=true; caption.TextTruncate=Enum.TextTruncate.None; caption.TextSize=22
-            caption.Size=UDim2.fromOffset(188,50)
-            txt(b,'Description',d.desc,72,59,186,42,18,false,true,true)
-        else
-            txt(b,'Description',d.desc,72,44,186,54,18,false,true,true)
-        end
+        icon(b,d.kind,12,28,40)
+        local caption=txt(b,'Title',d.name,62,10,222,34,23,true,false,false)
+        local size=23
+        while size>19 and avatarTextService:GetTextSize(d.name,size,Enum.Font.GothamMedium,Vector2.new(10000,34)).X>222 do size=size-1 end
+        caption.TextSize=size
+        txt(b,'Description',d.desc,62,44,222,44,18,false,true,true)
     end
-    list.CanvasSize=UDim2.fromOffset(0,y-12)
-    local detail=avatarCard(canvas,'PlayerSettings',294,72,414,476,false)
+    list.CanvasSize=UDim2.fromOffset(0,y-10)
+    local detail=avatarCard(canvas,'PlayerSettings',320,72,388,476,false)
     detail.BackgroundColor3=C.slot
     local symbol
-    local title=txt(detail,'Title','',66,14,228,40,29,true,false,false)
-    local description=txt(detail,'Description','',16,66,382,56,20,false,true,true)
-    thin(detail,16,132,382)
-    local toggle=avatarCard(detail,'EnableToggle',318,20,80,36,true)
+    local title=txt(detail,'Title','',66,14,214,40,29,true,false,false)
+    local description=txt(detail,'Description','',16,66,356,56,20,false,true,true)
+    thin(detail,16,132,356)
+    local toggle=avatarCard(detail,'EnableToggle',292,20,80,36,true)
     local showPlayerToggle=compactCheck(toggle,80,36)
-    local controls=new('Frame',{Name='NumericSettings',Position=UDim2.fromOffset(16,144),Size=UDim2.fromOffset(382,236),BackgroundTransparency=1},detail)
-    local fieldTitle=txt(controls,'SliderHeading','',0,0,382,34,23,true,false,false)
-    local touchTrack=new('Frame',{Name='SliderTouchArea',Position=UDim2.fromOffset(0,39),Size=UDim2.fromOffset(294,48),BackgroundTransparency=1,Active=true},controls)
-    local rail=new('Frame',{Position=UDim2.fromOffset(11,19),Size=UDim2.fromOffset(272,10),BackgroundColor3=Color3.fromRGB(82,84,90),BorderSizePixel=0},touchTrack); corner(rail,5)
+    local controls=new('Frame',{Name='NumericSettings',Position=UDim2.fromOffset(16,144),Size=UDim2.fromOffset(356,236),BackgroundTransparency=1},detail)
+    local fieldTitle=txt(controls,'SliderHeading','',0,0,356,34,23,true,false,false)
+    local touchTrack=new('Frame',{Name='SliderTouchArea',Position=UDim2.fromOffset(0,39),Size=UDim2.fromOffset(268,48),BackgroundTransparency=1,Active=true},controls)
+    local rail=new('Frame',{Position=UDim2.fromOffset(11,19),Size=UDim2.fromOffset(246,10),BackgroundColor3=Color3.fromRGB(82,84,90),BorderSizePixel=0},touchTrack); corner(rail,5)
     local fill=new('Frame',{Size=UDim2.fromScale(0,1),BackgroundColor3=Color3.fromRGB(177,179,185),BorderSizePixel=0},rail); corner(fill,5)
     local thumb=new('Frame',{Name='SliderThumb',AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(0,.5),Size=UDim2.fromOffset(25,25),BackgroundColor3=C.text,BorderSizePixel=0},rail); corner(thumb,13)
-    local valueCard=avatarCard(controls,'SliderValue',306,41,76,44,false); valueCard.BackgroundColor3=C.side
+    local valueCard=avatarCard(controls,'SliderValue',280,41,76,44,false); valueCard.BackgroundColor3=C.side
     local valueLabel=avatarText(valueCard,'Value','60',0,0,76,44,22,true,true,false)
-    local manualHeading=txt(controls,'ManualHeading','Ввести вручную',0,98,382,32,21,false,true,false)
+    local manualHeading=txt(controls,'ManualHeading','Ввести вручную',0,98,356,32,21,false,true,false)
     local rangeMin=txt(controls,'SliderMinimum','0',11,89,50,22,16,false,true,false)
-    local rangeMax=txt(controls,'SliderMaximum','2000',213,89,70,22,16,false,true,false)
+    local rangeMax=txt(controls,'SliderMaximum','2000',187,89,70,22,16,false,true,false)
     rangeMax.TextXAlignment=Enum.TextXAlignment.Right
     rangeMin.Visible=false; rangeMax.Visible=false
-    local inputBg=avatarCard(controls,'ManualBackground',0,136,382,48,false); inputBg.BackgroundColor3=C.side
+    local inputBg=avatarCard(controls,'ManualBackground',0,136,356,48,false); inputBg.BackgroundColor3=C.side
     local input=new('TextBox',{Name='ManualValue',Position=UDim2.fromOffset(12,0),Size=UDim2.new(1,-24,1,0),BackgroundTransparency=1,Text='60',TextColor3=C.text,PlaceholderText='Введите число',PlaceholderColor3=muted,Font=Enum.Font.GothamMedium,TextSize=23,TextScaled=false,TextXAlignment=Enum.TextXAlignment.Left,ClearTextOnFocus=false},inputBg)
-    local note=txt(controls,'PreviewNotice','Настройки пока демонстрационные.',0,193,382,40,17,false,true,true)
-    local noSettings=txt(detail,'NoNumericSettings','Дополнительных настроек нет.',16,150,382,72,21,false,true,true)
-    local reset=avatarCard(detail,'ResetButton',213,406,185,54,true); reset.BackgroundColor3=selectedColor
+    local note=txt(controls,'PreviewNotice','Настройки пока демонстрационные.',0,193,356,40,17,false,true,true)
+    local noSettings=txt(detail,'NoNumericSettings','Дополнительных настроек нет.',16,150,356,72,21,false,true,true)
+    local reset=avatarCard(detail,'ResetButton',187,406,185,54,true); reset.BackgroundColor3=selectedColor
     icon(reset,'reset',12,14,26); txt(reset,'Caption','Сброс',48,0,130,54,21,true,false,false)
     local current=1
     local dragInput=nil
@@ -1003,13 +1001,13 @@ local function buildPlayerPage()
         local d,s=defs[i],states[i]
         for j,b in ipairs(cards) do
             b.BackgroundColor3=j==i and selectedColor or C.slot
-            outlines[j].Transparency=j==i and .12 or .65
+            outlines[j].Transparency=j==i and .16 or .65
         end
         if symbol then symbol:Destroy() end
         symbol=icon(detail,d.kind,16,14,40)
         title.Text=d.name; description.Text=d.desc
         title.TextSize=29
-        while title.TextSize>18 and avatarTextService:GetTextSize(d.name,title.TextSize,Enum.Font.GothamMedium,Vector2.new(10000,40)).X>228 do title.TextSize=title.TextSize-1 end
+        while title.TextSize>18 and avatarTextService:GetTextSize(d.name,title.TextSize,Enum.Font.GothamMedium,Vector2.new(10000,40)).X>214 do title.TextSize=title.TextSize-1 end
         toggle.Visible=not d.unavailable; reset.Visible=not d.unavailable and d.name~='NoClip'
         controls.Visible=d.max~=nil; noSettings.Visible=d.max==nil
         local sliderOnly=d.sliderOnly==true
