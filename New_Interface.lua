@@ -383,19 +383,30 @@ local function panel(p,x,y,w,h,button)
  if button then f.Text=''; f.AutoButtonColor=true end
  corner(f,10); stroke(f,C.line,.65,1); return f
 end
-local profile=panel(home,0,0,1,168,false)
-local avatar=new('ImageLabel',{Position=UDim2.fromOffset(16,24),Size=UDim2.fromOffset(120,120),BackgroundColor3=C.side,BorderSizePixel=0,Image=''},profile)
-corner(avatar,60); stroke(avatar,C.line,.25,2)
-label(profile,'Добро пожаловать,',152,20,.72,30,25,false)
-label(profile,player.DisplayName,152,53,.72,44,34,true)
-label(profile,'@'..player.Name,152,100,.72,32,23,false)
+-- Independent welcome header, followed by the existing player profile.
+do
+    local welcome=panel(home,0,0,1,76,false)
+    welcome.Name='WelcomeHeader'
+    libraryIcon(welcome,'house',UDim2.fromOffset(24,14),48,'WelcomeIcon')
+    new('Frame',{Name='WelcomeIconDivider',Position=UDim2.fromOffset(88,14),Size=UDim2.fromOffset(2,48),BackgroundColor3=Color3.fromRGB(143,145,152),BackgroundTransparency=.08,BorderSizePixel=0},welcome)
+    local greeting=label(welcome,'Добро пожаловать',106,0,1,76,34,true)
+    greeting.Name='WelcomeTitle'
+    greeting.Size=UDim2.new(1,-120,0,76)
+end
+local profile=panel(home,0,0,1,132,false)
+profile.Name='PlayerProfile'
+profile.Position=UDim2.fromOffset(12,100)
+local avatar=new('ImageLabel',{Position=UDim2.fromOffset(16,12),Size=UDim2.fromOffset(108,108),BackgroundColor3=C.side,BorderSizePixel=0,Image=''},profile)
+corner(avatar,54); stroke(avatar,C.line,.25,2)
+label(profile,player.DisplayName,152,22,.72,44,34,true).Size=UDim2.new(1,-164,0,44)
+label(profile,'@'..player.Name,152,68,.72,32,23,false).Size=UDim2.new(1,-164,0,32)
 task.spawn(function() local ok,url=pcall(function() return Players:GetUserThumbnailAsync(player.UserId,Enum.ThumbnailType.HeadShot,Enum.ThumbnailSize.Size150x150) end); if ok and avatar.Parent then avatar.Image=url end end)
 local homeLibrary={refresh="refresh-cw",server="server",users="users-round",info="info",globe="globe"}
 local function homeIcon(parent,kind,x,y,size)
     return libraryIcon(parent,homeLibrary[kind],UDim2.new(x,0,0,y),size,kind.."Icon",nil,Vector2.new(x==.5 and .5 or 0,0))
 end
 local function action(x,title,sub,kind)
- local b=panel(home,x,0,.5,76,true); b.Position=UDim2.new(x,12,0,192)
+ local b=panel(home,x,0,.5,76,true); b.Position=UDim2.new(x,12,0,244)
  local glyph=homeIcon(b,kind,0,16,44); glyph.Position=UDim2.fromOffset(14,16)
  new('Frame',{Position=UDim2.fromOffset(70,12),Size=UDim2.fromOffset(1,52),BackgroundColor3=C.line,BackgroundTransparency=.35,BorderSizePixel=0},b)
  local t=label(b,title,82,8,1,30,23,true); t.Size=UDim2.new(1,-90,0,30)
@@ -404,7 +415,7 @@ local function action(x,title,sub,kind)
 end
 local rejoin=action(0,'Переподключиться','Зайти на этот же сервер','refresh')
 local hop=action(.5,'Другой сервер','Найти новый сервер','server')
-local online=panel(home,0,0,.5,86,false); online.Position=UDim2.fromOffset(12,280)
+local online=panel(home,0,0,.5,86,false); online.Position=UDim2.fromOffset(12,332)
 local oi=homeIcon(online,'users',0,23,40); oi.Position=UDim2.fromOffset(12,23)
 label(online,'Игроки онлайн',64,5,.72,32,23,true)
 local count=label(online,'',64,37,.72,40,32,true)
@@ -413,7 +424,7 @@ updateCount()
 local joined=Players.PlayerAdded:Connect(function() task.defer(updateCount) end)
 local left=Players.PlayerRemoving:Connect(function() task.defer(updateCount) end)
 gui.Destroying:Connect(function() joined:Disconnect(); left:Disconnect() end)
-local info=panel(home,.5,0,.5,86,true); info.Position=UDim2.new(.5,12,0,280)
+local info=panel(home,.5,0,.5,86,true); info.Position=UDim2.new(.5,12,0,332)
 local ii=homeIcon(info,'info',0,23,40); ii.Position=UDim2.fromOffset(12,23)
 label(info,'Информация  ›',64,5,.72,34,25,true)
 label(info,'Версия и обновления',64,42,.72,30,19,false)
@@ -430,7 +441,7 @@ local modalScale=new('UIScale',{Scale=1},modal)
 do
     local language=panel(home,0,0,.5,76,true)
     language.Name='LanguageButton'
-    language.Position=UDim2.fromOffset(12,378)
+    language.Position=UDim2.fromOffset(12,430)
     local glyph=homeIcon(language,'globe',0,18,40)
     glyph.Position=UDim2.fromOffset(12,18)
     local title=label(language,'Язык интерфейса',64,5,1,32,23,true)
