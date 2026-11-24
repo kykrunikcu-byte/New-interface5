@@ -110,9 +110,9 @@ new("TextLabel", {
 local function control(name, txt, right)
     local b=new("TextButton", {
         Name=name, AnchorPoint=Vector2.new(1,0), Position=UDim2.new(1,-right,0,13),
-        Size=UDim2.fromOffset(48,48), BackgroundColor3=C.slot,
-        BorderSizePixel=0, Text=txt, TextColor3=C.text,
-        TextSize=20, Font=Enum.Font.GothamMedium, AutoButtonColor=true,
+        Size=UDim2.fromOffset(48,48), BackgroundColor3=name=='Close' and Color3.fromRGB(87,49,55) or C.slot,
+        BorderSizePixel=0, Text='', TextColor3=C.text,
+        TextSize=20, Font=Enum.Font.GothamMedium, AutoButtonColor=false,
     },header)
     corner(b,8)
     return b
@@ -252,6 +252,11 @@ local IconPNG = {
     ["hat"] = [=[iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAMFBMVEX///////////////////////////////////////////////////////////////9Or7hAAAAAEHRSTlMAESIzRFVmd4iZqrvM3e7/dpUBFQAAAL1JREFUeAFjGAVgEHsVh8T9/6RKxH/FKsza9f//igBMcY3/YNCELs4BEf//vwFVnOk8TOKPAoqE7v//f1sVmCLu//9/CUXD/f9/C0AMdiADWQvP//+LICyt//8PIEn0//8FY67//wPJpP//F8DYXP//I8ziQDIYaB3Cxfz/vyO01///gAik/xcQErz/EUHWj+xfDiTb1/9HCjxWhAsZkB0CciKSBHIwkCsRCwtuZABJACRI/MVlFK50NwqwAgAGsre9i7ZqwAAAAABJRU5ErkJggg==]=],
 }
 local IconVector = {
+    -- Lucide v0.456.0: minus, plus, x, circle-check (native lightweight paths).
+    ["minus"] = {{5,12,19,12}},
+    ["plus"] = {{5,12,19,12},{12,5,12,19}},
+    ["x"] = {{18,6,6,18},{6,6,18,18}},
+    ["circle-check"] = {{22,12,21.51,15.09,20.09,17.88,17.88,20.09,15.09,21.51,12,22,8.91,21.51,6.12,20.09,3.91,17.88,2.49,15.09,2,12,2.49,8.91,3.91,6.12,6.12,3.91,8.91,2.49,12,2,15.09,2.49,17.88,3.91,20.09,6.12,21.51,8.91,22,12},{9,12,11,14,15,10}},
     ["house"] = {{15,21,15,13,14,12,9.29,12.29,9,21},{3,10,3.71,8.47,10.71,2.47,11.54,2.05,13.29,2.47,20.81,9.16,20.73,20.01,19,21,3.99,20.73,3,19,3,10}},
     ["contact-round"] = {{16,2,16,4},{17.92,22,17.44,19.67,16.16,17.76,14.25,16.47,11.92,16,9.58,16.47,7.67,17.76,6.39,19.67,5.92,22},{8,2,8,4},{16,12,15.06,14.57,12.7,15.94,10,15.46,8.24,13.37,8,12,8.94,9.43,11.31,8.06,14,8.54,15.76,10.63,16,12},{5,4,19,4,20.73,4.99,21,20,20.01,21.73,5,22,3.27,21.01,3,6,3.27,4.99,5,4}},
     ["user-round-cog"] = {{2,21,2.87,17.38,5.28,14.54,8.72,13.1,12.43,13.38},{15,8,14.82,9.35,13.41,11.65,11.02,12.9,9.66,12.99,7.12,12.09,6.12,11.16,5.05,8.68,5.41,6.01,6.12,4.85,7.12,3.92,9.66,3.01,11.02,3.11,13.41,4.35,14.82,6.65,15,8},{21,18,20.7,19.3,18.67,20.93,16.13,20.35,15,18,15.3,16.7,17.33,15.08,19.87,15.66,21,18},{19.5,14.3,19.1,15.2},{16.9,20.8,16.5,21.7},{21.7,19.5,20.8,19.1},{15.2,16.9,14.3,16.5},{21.7,16.5,20.8,16.9},{15.2,19.1,14.3,19.5},{19.5,21.7,19.1,20.8},{16.9,15.2,16.5,14.3}},
@@ -368,6 +373,81 @@ local function libraryIcon(parent,key,position,size,name,tint,anchor)
     end
     return holder
 end
+-- v31: Danger Accent controls and Horizon Progress notifications.
+-- Render simple Lucide paths synchronously; no additional assets are needed.
+local function nativeSymbol(parent,key,size,name,tint)
+    local holder=new("Frame",{Name=name,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(size,size),BackgroundTransparency=1,BorderSizePixel=0,Active=false,ZIndex=parent.ZIndex+1},parent)
+    drawFallback(holder,key,size,tint or C.text)
+    return holder
+end
+local function updateMinimizeSymbol()
+    local minus=minimize:FindFirstChild("MinimizeIcon")
+    local plus=minimize:FindFirstChild("RestoreIcon")
+    if minus and plus then minus.Visible=not collapsed; plus.Visible=collapsed end
+end
+do
+    nativeSymbol(close,"x",24,"CloseIcon")
+    nativeSymbol(minimize,"minus",24,"MinimizeIcon")
+    nativeSymbol(minimize,"plus",24,"RestoreIcon").Visible=false
+end
+local showToast
+do
+    local activeToast
+    showToast=function(message)
+        if not window.Parent or collapsed then return end
+        if activeToast and activeToast.Parent then activeToast:Destroy() end
+        local green=Color3.fromRGB(119,214,150)
+        local toast=new("Frame",{Name="HorizonProgressToast",AnchorPoint=Vector2.new(.5,1),Position=UDim2.new(.5,0,1,-14),Size=UDim2.fromOffset(320,66),BackgroundColor3=C.slot,BorderSizePixel=0,Active=false,ZIndex=80},window)
+        activeToast=toast
+        corner(toast,8)
+        stroke(toast,C.line,.35,1)
+        local iconHost=new("Frame",{Position=UDim2.fromOffset(14,12),Size=UDim2.fromOffset(32,32),BackgroundTransparency=1,BorderSizePixel=0,Active=false,ZIndex=81},toast)
+        nativeSymbol(iconHost,"circle-check",30,"SuccessIcon",green)
+        new("Frame",{Name="IconDivider",Position=UDim2.fromOffset(56,12),Size=UDim2.fromOffset(2,32),BackgroundColor3=Color3.fromRGB(133,135,142),BorderSizePixel=0,Active=false,ZIndex=81},toast)
+        new("TextLabel",{Name="Message",Position=UDim2.fromOffset(70,0),Size=UDim2.new(1,-82,0,56),BackgroundTransparency=1,Text=message,TextColor3=C.text,Font=Enum.Font.GothamMedium,TextSize=23,TextScaled=false,TextTruncate=Enum.TextTruncate.AtEnd,TextXAlignment=Enum.TextXAlignment.Left,Active=false,ZIndex=81},toast)
+        local track=new("Frame",{Name="ProgressTrack",Position=UDim2.new(0,8,1,-7),Size=UDim2.new(1,-16,0,3),BackgroundColor3=Color3.fromRGB(65,67,73),BorderSizePixel=0,Active=false,ZIndex=81,ClipsDescendants=true},toast)
+        corner(track,2)
+        local fill=new("Frame",{Name="ProgressFill",Size=UDim2.fromScale(0,1),BackgroundColor3=green,BorderSizePixel=0,Active=false,ZIndex=82},track)
+        corner(fill,2)
+        local fadeTargets={}
+        local function addTarget(object,property)
+            fadeTargets[#fadeTargets+1]={object=object,property=property,alpha=object[property]}
+        end
+        addTarget(toast,"BackgroundTransparency")
+        for _,object in ipairs(toast:GetDescendants()) do
+            if object:IsA("UIStroke") then
+                addTarget(object,"Transparency")
+            elseif object:IsA("TextLabel") then
+                addTarget(object,"TextTransparency")
+                if object.BackgroundTransparency<1 then addTarget(object,"BackgroundTransparency") end
+            elseif object:IsA("Frame") and object.BackgroundTransparency<1 then
+                addTarget(object,"BackgroundTransparency")
+            end
+        end
+        local function fade(visible,duration)
+            for _,target in ipairs(fadeTargets) do
+                if target.object.Parent then
+                    TweenService:Create(target.object,TweenInfo.new(duration,Enum.EasingStyle.Sine,Enum.EasingDirection.Out),{[target.property]=visible and target.alpha or 1}):Play()
+                end
+            end
+        end
+        for _,target in ipairs(fadeTargets) do target.object[target.property]=1 end
+        fade(true,.20)
+        task.delay(.20,function()
+            if not toast.Parent or activeToast~=toast then return end
+            local progress=TweenService:Create(fill,TweenInfo.new(2,Enum.EasingStyle.Linear),{Size=UDim2.fromScale(1,1)})
+            progress.Completed:Once(function(state)
+                if state~=Enum.PlaybackState.Completed or not toast.Parent or activeToast~=toast then return end
+                fade(false,.25)
+                task.delay(.25,function()
+                    if toast.Parent then toast:Destroy() end
+                    if activeToast==toast then activeToast=nil end
+                end)
+            end)
+            progress:Play()
+        end)
+    end
+end
 local navLibrary={"house","contact-round","user-round-cog","eye","swords","shield"}
 local function drawIcon(parent,index)
     return libraryIcon(parent,navLibrary[index],UDim2.new(0,10,.5,-19),38,"VectorIcon")
@@ -479,7 +559,7 @@ do
         caption.Size=UDim2.new(1,-66,0,56); caption.ZIndex=23
         local mark=libraryIcon(row,'check',UDim2.new(1,-39,0,16),24,'LanguageCheck')
         rows[i]=row; marks[i]=mark
-        row.Activated:Connect(function() selected=i; refresh() end)
+        row.Activated:Connect(function() if selected==i then return end; selected=i; refresh(); showToast('Язык выбран') end)
     end
     local note=label(picker,'Предпросмотр выбора языка',16,209,1,48,18,false)
     note.Size=UDim2.new(1,-32,0,48); note.TextWrapped=true; note.TextTruncate=Enum.TextTruncate.None; note.ZIndex=22
@@ -587,6 +667,9 @@ local function softPreview(button,callback)
         tween:Play()
     end)
 end
+-- Existing Soft Press animation, without replacing the control callbacks.
+softPreview(minimize)
+softPreview(close)
 local tabAvatar=avatarCard(avatarCanvas,'AvatarTab',12,12,344,46,true)
 local tabOutfits=avatarCard(avatarCanvas,'OutfitsTab',364,12,344,46,true)
 avatarIcon(tabAvatar,'user',120,10,26); avatarText(tabAvatar,'Caption','Аватар',154,0,120,46,21,true,false,false)
@@ -834,6 +917,7 @@ local function buildPlayerPage()
         local d,s=defs[current],states[current]
         s.enabled=false; s.value=d.default or 0; s.manual=tostring(s.value); input.Text=s.manual
         refreshValue(); refreshToggle(true)
+        showToast('Настройки сброшены')
     end)
     input.FocusLost:Connect(function()
         local d,s=defs[current],states[current]
@@ -841,6 +925,7 @@ local function buildPlayerPage()
         local n=tonumber(input.Text)
         if n and n==n and n>=0 and n<=d.manualMax then
             s.value=math.floor(n+.5); s.manual=tostring(s.value)
+            showToast('Значение принято')
         end
         input.Text=s.manual; refreshValue()
     end)
@@ -1088,7 +1173,11 @@ minimize.MouseButton1Click:Connect(function()
     collapsed=not collapsed
     body.Visible=not collapsed
     overlay.Visible=false
-    minimize.Text=collapsed and "+" or "−"
+    updateMinimizeSymbol()
+    if collapsed then
+        local toast=window:FindFirstChild('HorizonProgressToast')
+        if toast then toast:Destroy() end
+    end
     local current=window.Size
     if collapsed then
         window:SetAttribute("ExpandedWidth",current.X.Offset)
