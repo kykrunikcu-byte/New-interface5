@@ -717,9 +717,9 @@ local function buildPlayerPage()
     local function icon(p,kind,x,y,size)
         return libraryIcon(p,playerLibrary[kind],UDim2.fromOffset(x,y),size,kind.."Icon")
     end
-    icon(canvas,'motion',16,14,42)
-    new('Frame',{Name='HeadingIconDivider',Position=UDim2.fromOffset(63,13),Size=UDim2.fromOffset(1,44),BackgroundColor3=C.line,BackgroundTransparency=.15,BorderSizePixel=0},canvas)
-    txt(canvas,'Heading','Игрок',68,8,620,54,34,true,false,false)
+    icon(canvas,'motion',16,10,50)
+    new('Frame',{Name='HeadingIconDivider',Position=UDim2.fromOffset(76,11),Size=UDim2.fromOffset(2,48),BackgroundColor3=Color3.fromRGB(143,145,152),BackgroundTransparency=.08,BorderSizePixel=0},canvas)
+    txt(canvas,'Heading','Игрок',88,8,600,54,40,true,false,false).Font=Enum.Font.GothamBold
     local defs={
         {name='Флай',kind='wing',desc='Позволяет свободно летать по карте.',label='Скорость полёта',default=60,max=1000,manualMax=100000000},
         {name='NoClip',kind='cube',desc='Проходить сквозь стены и объекты.'},
@@ -880,10 +880,10 @@ local function buildESPPage()
     local function icon(p,kind,x,y,size)
         return libraryIcon(p,espLibrary[kind],UDim2.fromOffset(x,y),size,kind.."Icon")
     end
-    icon(canvas,'eye',16,18,45)
-    new('Frame',{Name='HeadingIconDivider',Position=UDim2.fromOffset(66,19),Size=UDim2.fromOffset(1,44),BackgroundColor3=C.line,BackgroundTransparency=.15,BorderSizePixel=0},canvas)
-    txt(canvas,'Heading','ESP',72,8,620,42,34,true,false)
-    txt(canvas,'Subtitle','Визуализация игроков и объектов',72,48,620,30,19,false,true)
+    icon(canvas,'eye',16,16,50)
+    new('Frame',{Name='HeadingIconDivider',Position=UDim2.fromOffset(76,17),Size=UDim2.fromOffset(2,48),BackgroundColor3=Color3.fromRGB(143,145,152),BackgroundTransparency=.08,BorderSizePixel=0},canvas)
+    txt(canvas,'Heading','ESP',88,8,600,44,40,true,false).Font=Enum.Font.GothamBold
+    txt(canvas,'Subtitle','Визуализация игроков и объектов',88,52,600,26,19,false,true)
     local defs={
         {'Игроки ESP','Обнаружение игроков','user','Обнаружение игроков'},
         {'ESP NPC','NPC и монстры','bot','Обнаружение NPC'},
