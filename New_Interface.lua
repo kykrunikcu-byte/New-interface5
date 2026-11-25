@@ -588,14 +588,20 @@ do
 
     -- Reuse the existing modal backdrop so tab switching and minimizing
     -- dismiss either dialog through the original overlay cleanup.
-    local picker=new('Frame',{Name='LanguagePicker',AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.new(.72,0,0,282),BackgroundColor3=C.outer,BorderSizePixel=0,ZIndex=21,Visible=false},overlay)
-    new('UISizeConstraint',{MaxSize=Vector2.new(460,282)},picker)
+    local picker=new('Frame',{Name='LanguagePicker',AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.new(.82,0,.84,0),BackgroundColor3=C.outer,BorderSizePixel=0,ZIndex=21,Visible=false},overlay)
+    new('UISizeConstraint',{MaxSize=Vector2.new(520,510)},picker)
     corner(picker,14); stroke(picker,C.line,.25,1)
     local pickerTitle=label(picker,'Язык интерфейса',20,10,1,48,26,true)
     pickerTitle.Size=UDim2.new(1,-78,0,48); pickerTitle.ZIndex=22
     local x=new('TextButton',{Name='CloseLanguage',AnchorPoint=Vector2.new(1,0),Position=UDim2.new(1,-12,0,12),Size=UDim2.fromOffset(44,44),Text='×',TextSize=28,TextColor3=C.text,BackgroundColor3=C.slot,BorderSizePixel=0,ZIndex=22},picker); corner(x,8)
     local pickerScale=new('UIScale',{Scale=1},picker)
-    local options={'Русский','English'}
+    local options={
+        'Русский','English','Español (Latinoamérica)','Português (Brasil)',
+        'Français (France)','Deutsch (Deutschland)','Polski','Türkçe',
+        '日本語','한국어','中文（简体）','Беларуская',
+        'Bahasa Indonesia','ไทย','العربية','Italiano','Filipino','Nederlands',
+    }
+    local list=new('ScrollingFrame',{Name='LanguageOptionsScroll',Position=UDim2.fromOffset(16,70),Size=UDim2.new(1,-32,1,-122),BackgroundTransparency=1,BorderSizePixel=0,CanvasSize=UDim2.fromOffset(0,#options*66-10),ScrollingDirection=Enum.ScrollingDirection.Y,ScrollBarThickness=4,ScrollBarImageColor3=C.line,ClipsDescendants=true,ZIndex=22},picker)
     local rows,marks={},{}
     local selected=1
     local function refresh()
@@ -606,19 +612,25 @@ do
         value.Text=options[selected]
     end
     for i,name in ipairs(options) do
-        local row=new('TextButton',{Name='LanguageOption'..i,Position=UDim2.fromOffset(16,70+(i-1)*66),Size=UDim2.new(1,-32,0,56),Text='',AutoButtonColor=false,BackgroundColor3=C.slot,BorderSizePixel=0,ZIndex=22},picker)
+        local row=new('TextButton',{Name='LanguageOption'..i,Position=UDim2.fromOffset(0,(i-1)*66),Size=UDim2.new(1,-8,0,56),Text='',AutoButtonColor=false,BackgroundColor3=C.slot,BorderSizePixel=0,ZIndex=23},list)
         corner(row,8); stroke(row,C.line,.65,1)
         local caption=label(row,name,16,0,1,56,24,true)
-        caption.Size=UDim2.new(1,-66,0,56); caption.ZIndex=23
+        caption.Size=UDim2.new(1,-66,0,56); caption.ZIndex=24
+        caption.TextWrapped=true; caption.TextTruncate=Enum.TextTruncate.None
+        caption.TextScaled=true; new('UITextSizeConstraint',{MinTextSize=12,MaxTextSize=24},caption)
         local mark=libraryIcon(row,'check',UDim2.new(1,-39,0,16),24,'LanguageCheck')
         rows[i]=row; marks[i]=mark
         row.Activated:Connect(function() if selected==i then return end; selected=i; refresh(); showToast('Язык выбран') end)
     end
-    local note=label(picker,'Предпросмотр выбора языка',16,209,1,48,18,false)
-    note.Size=UDim2.new(1,-32,0,48); note.TextWrapped=true; note.TextTruncate=Enum.TextTruncate.None; note.ZIndex=22
+    local note=label(picker,'Предпросмотр выбора языка',16,0,1,40,18,false)
+    note.Position=UDim2.new(0,16,1,-46)
+    note.Size=UDim2.new(1,-32,0,40); note.TextWrapped=true; note.TextTruncate=Enum.TextTruncate.None; note.ZIndex=22
     local function show(target,scale)
         modal.Visible=target==modal; picker.Visible=target==picker
         overlay.Visible=true; scale.Scale=.94
+        if target==picker then
+            list.CanvasPosition=Vector2.new(0,math.max(0,math.min((selected-1)*66,#options*66-10-list.AbsoluteWindowSize.Y)))
+        end
         TweenService:Create(scale,TweenInfo.new(.18),{Scale=1}):Play()
     end
     refresh()
