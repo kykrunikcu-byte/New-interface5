@@ -980,11 +980,15 @@ local function buildPlayerPage()
         y=y+108
         b.BackgroundColor3=C.slot; cards[i]=b; outlines[i]=b:FindFirstChildOfClass('UIStroke')
         icon(b,d.kind,12,28,40)
-        local caption=txt(b,'Title',d.name,62,10,222,34,23,true,false,false)
-        local size=23
-        while size>19 and avatarTextService:GetTextSize(d.name,size,Enum.Font.GothamMedium,Vector2.new(10000,34)).X>222 do size=size-1 end
+        new('Frame',{Name='CardIconDivider',Position=UDim2.fromOffset(59,19),Size=UDim2.fromOffset(1,60),BackgroundColor3=C.line,BackgroundTransparency=.28,BorderSizePixel=0,Active=false},b)
+        local caption=txt(b,'Title',d.name,70,9,214,32,22,true,false,false)
+        caption.Font=Enum.Font.GothamBold
+        local size=22
+        while size>18 and avatarTextService:GetTextSize(d.name,size,caption.Font,Vector2.new(10000,32)).X>214 do size=size-1 end
         caption.TextSize=size
-        txt(b,'Description',d.desc,62,44,222,44,18,false,true,true)
+        local desc=txt(b,'Description',d.desc,70,44,214,44,17,false,true,true)
+        desc.TextColor3=Color3.fromRGB(193,195,202)
+        desc.TextYAlignment=Enum.TextYAlignment.Top
     end
     list.CanvasSize=UDim2.fromOffset(0,y-10)
     local detail=avatarCard(canvas,'PlayerSettings',320,72,388,476,false)
@@ -1141,12 +1145,16 @@ local function buildESPPage()
         local b=avatarCard(canvas,'ESPOption'..i,12,94+(i-1)*108,296,98,true)
         b.BackgroundColor3=C.slot; cards[i]=b; outlines[i]=b:FindFirstChildOfClass('UIStroke')
         icon(b,d[3],12,28,40)
-        local title=txt(b,'Title',d[1],62,10,222,34,23,true,false)
-        local size=23
-        while size>19 and avatarTextService:GetTextSize(d[1],size,Enum.Font.GothamMedium,Vector2.new(10000,34)).X>222 do size=size-1 end
+        new('Frame',{Name='CardIconDivider',Position=UDim2.fromOffset(59,19),Size=UDim2.fromOffset(1,60),BackgroundColor3=C.line,BackgroundTransparency=.28,BorderSizePixel=0,Active=false},b)
+        local title=txt(b,'Title',d[1],70,9,214,32,22,true,false)
+        title.Font=Enum.Font.GothamBold
+        local size=22
+        while size>18 and avatarTextService:GetTextSize(d[1],size,title.Font,Vector2.new(10000,32)).X>214 do size=size-1 end
         title.TextSize=size
-        local desc=txt(b,'Description',d[2],62,44,222,44,18,false,true)
+        local desc=txt(b,'Description',d[2],70,44,214,44,17,false,true)
         desc.TextWrapped=true; desc.TextTruncate=Enum.TextTruncate.None
+        desc.TextColor3=Color3.fromRGB(193,195,202)
+        desc.TextYAlignment=Enum.TextYAlignment.Top
         b:SetAttribute('OptionIndex',i)
     end
     local detail=avatarCard(canvas,'ESPSettings',320,94,388,470,false); detail.BackgroundColor3=C.slot
@@ -1280,8 +1288,14 @@ local defensePage=(function()
         b.BackgroundColor3=C.slot
         cards[i]=b; outlines[i]=b:FindFirstChildOfClass('UIStroke')
         icon(b,d.key,12,28,40)
-        txt(b,'Title',d.heading,62,5,222,45,i==3 and 23 or 20,true,false,true)
-        txt(b,'Description',d.desc,62,50,222,42,17,false,true,true)
+        new('Frame',{Name='CardIconDivider',Position=UDim2.fromOffset(59,19),Size=UDim2.fromOffset(1,60),BackgroundColor3=C.line,BackgroundTransparency=.28,BorderSizePixel=0,Active=false},b)
+        local multiline=string.find(d.heading,"\n",1,true)~=nil
+        local title=txt(b,'Title',d.heading,70,multiline and 5 or 9,214,multiline and 45 or 32,multiline and 20 or 22,true,false,true)
+        title.Font=Enum.Font.GothamBold
+        while title.TextSize>18 and avatarTextService:GetTextSize(d.heading,title.TextSize,title.Font,Vector2.new(10000,45)).X>214 do title.TextSize=title.TextSize-1 end
+        local desc=txt(b,'Description',d.desc,70,multiline and 52 or 44,214,multiline and 40 or 44,17,false,true,true)
+        desc.TextColor3=Color3.fromRGB(193,195,202)
+        desc.TextYAlignment=Enum.TextYAlignment.Top
         b:SetAttribute('OptionIndex',i)
     end
     local detail=avatarCard(canvas,'DefenseSettings',320,94,388,470,false)
