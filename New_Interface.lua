@@ -857,8 +857,8 @@ local sampleNames={'Player_001','Player_002','Player_003','Player_004'}
 for i,name in ipairs(sampleNames) do
     local row=avatarCard(playerList,'SamplePlayer'..i,0,0,160,52,true); row.LayoutOrder=i; row.BackgroundColor3=C.slot
     local face=avatarCard(row,'Portrait',4,6,40,40,false); face.BackgroundColor3=C.content; avatarIcon(face,'user',3,3,34,2.8)
-    avatarRowName(row,'PlayerName',name,47,100)
-    libraryIcon(row,'chevron-right',UDim2.fromOffset(146,19),14,'Arrow',muted)
+    avatarRowName(row,'PlayerName',name,47,94)
+    libraryIcon(row,'chevron-right',UDim2.fromOffset(136,14),24,'Arrow',C.text)
     rows[i]=row
     softPreview(row,function() for j,other in ipairs(rows) do other.BackgroundColor3=j==i and selectedColor or C.slot end end)
 end
@@ -871,8 +871,8 @@ local items=new('ScrollingFrame',{Name='SampleCategories',Position=UDim2.fromOff
 new('UIListLayout',{Padding=UDim.new(0,7),SortOrder=Enum.SortOrder.LayoutOrder},items)
 for i,v in ipairs({{'hat','Аксессуары'},{'shirt','Одежда'},{'pants','Брюки'},{'face','Лица'},{'motion','Анимации'},{'cube','Другое'}}) do
     local row=avatarCard(items,'SampleCategory'..i,0,0,176,52,true); row.LayoutOrder=i; row.BackgroundColor3=C.slot
-    avatarIcon(row,v[1],8,10,32); avatarRowName(row,'CategoryName',v[2],46,115)
-    libraryIcon(row,'chevron-right',UDim2.fromOffset(161,19),14,'Arrow',muted); softPreview(row)
+    avatarIcon(row,v[1],8,10,32); avatarRowName(row,'CategoryName',v[2],46,111)
+    libraryIcon(row,'chevron-right',UDim2.fromOffset(152,14),24,'Arrow',C.text); softPreview(row)
 end
 -- Real native ViewportFrame with a simple locally constructed example mannequin.
 local viewport=new('ViewportFrame',{Name='AvatarViewport',Position=UDim2.fromOffset(8,56),Size=UDim2.fromOffset(288,383),BackgroundColor3=C.content,BorderSizePixel=0,Ambient=Color3.fromRGB(165,165,165),LightColor=Color3.fromRGB(255,255,255),LightDirection=Vector3.new(-1,-1,-1)},viewerPanel)
