@@ -254,6 +254,9 @@ local IconPNG = {
     ["hat"] = [=[iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAMFBMVEX///////////////////////////////////////////////////////////////9Or7hAAAAAEHRSTlMAESIzRFVmd4iZqrvM3e7/dpUBFQAAAL1JREFUeAFjGAVgEHsVh8T9/6RKxH/FKsza9f//igBMcY3/YNCELs4BEf//vwFVnOk8TOKPAoqE7v//f1sVmCLu//9/CUXD/f9/C0AMdiADWQvP//+LICyt//8PIEn0//8FY67//wPJpP//F8DYXP//I8ziQDIYaB3Cxfz/vyO01///gAik/xcQErz/EUHWj+xfDiTb1/9HCjxWhAsZkB0CciKSBHIwkCsRCwtuZABJACRI/MVlFK50NwqwAgAGsre9i7ZqwAAAAABJRU5ErkJggg==]=],
 }
 local IconVector = {
+    -- Lucide-style activity and signal paths for the profile metrics.
+    ["activity"] = {{2,12,6,12,9,3,15,21,18,12,22,12}},
+    ["signal"] = {{2,20,2,20},{7,20,7,16},{12,20,12,12},{17,20,17,8},{22,20,22,4}},
     -- Native line fallbacks for the three new Home utility icons.
     ["clock"] = {{12,2,15.83,2.76,19.07,4.93,21.24,8.17,22,12,21.24,15.83,19.07,19.07,15.83,21.24,12,22,8.17,21.24,4.93,19.07,2.76,15.83,2,12,2.76,8.17,4.93,4.93,8.17,2.76,12,2},{12,6,12,12,16,14}},
     ["save"] = {{19,21,5,21,3,19,3,5,5,3,17,3,21,7,21,19,19,21},{7,3,7,9,15,9,15,3},{7,21,7,13,17,13,17,21}},
@@ -495,7 +498,7 @@ local function panel(p,x,y,w,h,button)
  corner(f,10); stroke(f,C.line,.65,1); return f
 end
 -- Unified welcome and player profile (same footprint as the two previous panels).
-local profile=panel(home,0,0,1,220,false)
+local profile=panel(home,0,0,1,268,false)
 profile.Name='PlayerProfile'
 profile:FindFirstChildOfClass('UIStroke').Transparency=.35
 local avatar=new('ImageLabel',{Position=UDim2.fromOffset(18,74),Size=UDim2.fromOffset(120,120),BackgroundColor3=C.side,BorderSizePixel=0,Image=''},profile)
@@ -510,6 +513,41 @@ do
     displayName.Size=UDim2.new(1,-176,0,44)
     local username=label(profile,'@'..player.Name,164,135,1,32,23,false)
     username.Size=UDim2.new(1,-176,0,32)
+    -- One compact, single-line metrics strip inside the existing profile card.
+    -- Preview placeholders only: live telemetry will be connected separately.
+    local metrics=new('Frame',{Name='ProfileMetrics',Position=UDim2.fromOffset(12,206),Size=UDim2.new(1,-24,0,48),BackgroundColor3=Color3.fromRGB(57,58,64),BorderSizePixel=0},profile)
+    corner(metrics,10); stroke(metrics,C.line,.50,1)
+    local definitions={
+        {id='FPS',icon='activity',caption='FPS  —',short='FPS —',width=108},
+        {id='Ping',icon='signal',caption='Пинг  — мс',short='Пинг —',width=146},
+        {id='Session',icon='clock',caption='Сессия  —:—:—',short='—:—:—',width=174},
+    }
+    local metricRows={}
+    for i,def in ipairs(definitions) do
+        local cell=new('Frame',{Name=def.id,Position=UDim2.fromScale((i-1)/3,0),Size=UDim2.fromScale(1/3,1),BackgroundTransparency=1,BorderSizePixel=0},metrics)
+        local group=new('Frame',{Name='MetricContent',AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(def.width,32),BackgroundTransparency=1,BorderSizePixel=0},cell)
+        local metricIcon=libraryIcon(group,def.icon,UDim2.fromOffset(0,3),26,def.id..'Icon')
+        local metricIconScale=new('UIScale',{Scale=1},metricIcon)
+        local metricText=label(group,def.caption,36,0,1,32,18,false)
+        metricText.Name='Value'
+        metricText.TextColor3=C.text
+        metricText.Size=UDim2.new(1,-36,1,0)
+        metricRows[i]={group=group,icon=metricIcon,iconScale=metricIconScale,text=metricText,definition=def}
+        if i<3 then
+            new('Frame',{Name='MetricDivider'..i,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(i/3,.5),Size=UDim2.fromOffset(1,24),BackgroundColor3=C.line,BackgroundTransparency=.20,BorderSizePixel=0},metrics)
+        end
+    end
+    local function fitMetrics(narrow)
+        for _,item in ipairs(metricRows) do
+            item.group.Size=UDim2.fromOffset(narrow and 64 or item.definition.width,32)
+            item.icon.Position=UDim2.fromOffset(0,narrow and 9 or 3)
+            item.iconScale.Scale=narrow and .54 or 1
+            item.text.Position=UDim2.fromOffset(narrow and 18 or 36,0)
+            item.text.Size=UDim2.new(1,narrow and -18 or -36,1,0)
+            item.text.TextSize=narrow and 10 or 18
+            item.text.Text=narrow and item.definition.short or item.definition.caption
+        end
+    end
     local glyphScale=new('UIScale',{Scale=1},glyph)
     local function fitProfile()
         local narrow=window.Size.X.Offset<650
@@ -528,6 +566,7 @@ do
         username.Position=UDim2.fromOffset(narrow and 94 or 164,narrow and 120 or 135)
         username.Size=UDim2.new(1,narrow and -104 or -176,0,narrow and 26 or 32)
         username.TextSize=narrow and 14 or 23
+        fitMetrics(narrow)
     end
     local profileResize=window:GetPropertyChangedSignal('Size'):Connect(fitProfile)
     profile.Destroying:Connect(function() profileResize:Disconnect() end)
@@ -539,7 +578,7 @@ local function homeIcon(parent,kind,x,y,size)
     return libraryIcon(parent,homeLibrary[kind],UDim2.new(x,0,0,y),size,kind.."Icon",nil,Vector2.new(x==.5 and .5 or 0,0))
 end
 local function action(x,title,sub,kind)
- local b=panel(home,x,0,.5,76,true); b.Position=UDim2.new(x,12,0,244)
+ local b=panel(home,x,0,.5,76,true); b.Position=UDim2.new(x,12,0,292)
  local glyph=homeIcon(b,kind,0,16,44); glyph.Position=UDim2.fromOffset(14,16)
  new('Frame',{Position=UDim2.fromOffset(70,12),Size=UDim2.fromOffset(1,52),BackgroundColor3=C.line,BackgroundTransparency=.35,BorderSizePixel=0},b)
  local t=label(b,title,82,8,1,30,23,true); t.Size=UDim2.new(1,-90,0,30)
@@ -548,7 +587,7 @@ local function action(x,title,sub,kind)
 end
 local rejoin=action(0,'Переподключиться','Зайти на этот же сервер','refresh')
 local hop=action(.5,'Другой сервер','Найти новый сервер','server')
-local online=panel(home,0,0,.5,86,false); online.Position=UDim2.fromOffset(12,332)
+local online=panel(home,0,0,.5,86,false); online.Position=UDim2.fromOffset(12,380)
 local oi=homeIcon(online,'users',0,23,40); oi.Position=UDim2.fromOffset(12,23)
 label(online,'Игроки онлайн',64,5,.72,32,23,true)
 local count=label(online,'',64,37,.72,40,32,true)
@@ -557,7 +596,7 @@ updateCount()
 local joined=Players.PlayerAdded:Connect(function() task.defer(updateCount) end)
 local left=Players.PlayerRemoving:Connect(function() task.defer(updateCount) end)
 gui.Destroying:Connect(function() joined:Disconnect(); left:Disconnect() end)
-local info=panel(home,.5,0,.5,86,true); info.Position=UDim2.new(.5,12,0,332)
+local info=panel(home,.5,0,.5,86,true); info.Position=UDim2.new(.5,12,0,380)
 local ii=homeIcon(info,'info',0,23,40); ii.Position=UDim2.fromOffset(12,23)
 label(info,'Информация  ›',64,5,.72,34,25,true)
 label(info,'Версия и обновления',64,42,.72,30,19,false)
@@ -574,7 +613,7 @@ local modalScale=new('UIScale',{Scale=1},modal)
 do
     local language=panel(home,0,0,1,76,true)
     language.Name='LanguageButton'
-    language.Position=UDim2.fromOffset(12,430)
+    language.Position=UDim2.fromOffset(12,478)
     local glyph=homeIcon(language,'globe',0,18,40)
     glyph.Position=UDim2.fromOffset(12,18)
     local title=label(language,'Язык интерфейса',64,5,1,32,23,true)
@@ -742,7 +781,7 @@ do
             {id="AutoSave",title="Автосохранение",description="Сохранение и восстановление настроек всех функций.",icon="save"},
             {id="ShiftLock",title="Shift Lock Switch",description="Плавающая кнопка фиксации камеры.",icon="lock"},
         }
-        local firstY,step,height=518,88,76
+        local firstY,step,height=566,88,76
         for i,definition in ipairs(definitions) do
             local card=panel(home,0,0,1,height,false)
             card.Name="Home"..definition.id.."Card"
