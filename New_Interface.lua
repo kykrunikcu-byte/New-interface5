@@ -579,7 +579,7 @@ do
     glyph.Position=UDim2.fromOffset(12,18)
     local title=label(language,'Язык интерфейса',64,5,1,32,23,true)
     title.Size=UDim2.new(1,-94,0,32)
-    local value=label(language,'Русский',64,39,1,28,19,false)
+    local value=label(language,'🇷🇺 Русский',64,39,1,28,19,false)
     value.Size=UDim2.new(1,-94,0,28)
     local arrow=label(language,'›',0,0,1,76,29,false)
     arrow.Position=UDim2.new(1,-30,0,0)
@@ -595,11 +595,13 @@ do
     pickerTitle.Size=UDim2.new(1,-78,0,48); pickerTitle.ZIndex=22
     local x=new('TextButton',{Name='CloseLanguage',AnchorPoint=Vector2.new(1,0),Position=UDim2.new(1,-12,0,12),Size=UDim2.fromOffset(44,44),Text='×',TextSize=28,TextColor3=C.text,BackgroundColor3=C.slot,BorderSizePixel=0,ZIndex=22},picker); corner(x,8)
     local pickerScale=new('UIScale',{Scale=1},picker)
+    -- Native language names with representative country flags.
     local options={
-        'Русский','English','Español (Latinoamérica)','Português (Brasil)',
-        'Français (France)','Deutsch (Deutschland)','Polski','Türkçe',
-        '日本語','한국어','中文（简体）','Беларуская',
-        'Bahasa Indonesia','ไทย','العربية','Italiano','Filipino','Nederlands',
+        '🇷🇺 Русский','🇬🇧 English','🇪🇸 Español (Latinoamérica)','🇧🇷 Português (Brasil)',
+        '🇫🇷 Français (France)','🇩🇪 Deutsch (Deutschland)','🇵🇱 Polski','🇹🇷 Türkçe',
+        '🇯🇵 日本語','🇰🇷 한국어','🇨🇳 中文（简体）','🇧🇾 Беларуская',
+        '🇮🇩 Bahasa Indonesia','🇹🇭 ไทย','🇸🇦 العربية','🇮🇹 Italiano','🇵🇭 Filipino','🇳🇱 Nederlands',
+        '🇻🇳 Tiếng Việt','🇮🇳 हिन्दी',
     }
     local list=new('ScrollingFrame',{Name='LanguageOptionsScroll',Position=UDim2.fromOffset(16,70),Size=UDim2.new(1,-32,1,-122),BackgroundTransparency=1,BorderSizePixel=0,CanvasSize=UDim2.fromOffset(0,#options*66-10),ScrollingDirection=Enum.ScrollingDirection.Y,ScrollBarThickness=4,ScrollBarImageColor3=C.line,ClipsDescendants=true,ZIndex=22},picker)
     local rows,marks={},{}
