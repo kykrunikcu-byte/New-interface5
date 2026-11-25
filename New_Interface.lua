@@ -494,23 +494,45 @@ local function panel(p,x,y,w,h,button)
  if button then f.Text=''; f.AutoButtonColor=true end
  corner(f,10); stroke(f,C.line,.65,1); return f
 end
--- Independent welcome header, followed by the existing player profile.
-do
-    local welcome=panel(home,0,0,1,76,false)
-    welcome.Name='WelcomeHeader'
-    libraryIcon(welcome,'house',UDim2.fromOffset(24,14),48,'WelcomeIcon')
-    new('Frame',{Name='WelcomeIconDivider',Position=UDim2.fromOffset(88,14),Size=UDim2.fromOffset(2,48),BackgroundColor3=Color3.fromRGB(143,145,152),BackgroundTransparency=.08,BorderSizePixel=0},welcome)
-    local greeting=label(welcome,'Добро пожаловать',106,0,1,76,34,true)
-    greeting.Name='WelcomeTitle'
-    greeting.Size=UDim2.new(1,-120,0,76)
-end
-local profile=panel(home,0,0,1,132,false)
+-- Unified welcome and player profile (same footprint as the two previous panels).
+local profile=panel(home,0,0,1,220,false)
 profile.Name='PlayerProfile'
-profile.Position=UDim2.fromOffset(12,100)
-local avatar=new('ImageLabel',{Position=UDim2.fromOffset(16,12),Size=UDim2.fromOffset(108,108),BackgroundColor3=C.side,BorderSizePixel=0,Image=''},profile)
-corner(avatar,54); stroke(avatar,C.line,.25,2)
-label(profile,player.DisplayName,152,22,.72,44,34,true).Size=UDim2.new(1,-164,0,44)
-label(profile,'@'..player.Name,152,68,.72,32,23,false).Size=UDim2.new(1,-164,0,32)
+profile:FindFirstChildOfClass('UIStroke').Transparency=.35
+local avatar=new('ImageLabel',{Position=UDim2.fromOffset(18,74),Size=UDim2.fromOffset(120,120),BackgroundColor3=C.side,BorderSizePixel=0,Image=''},profile)
+corner(avatar,60); stroke(avatar,C.line,.25,2)
+do
+    local glyph=libraryIcon(profile,'house',UDim2.fromOffset(26,17),36,'WelcomeIcon')
+    local separator=new('Frame',{Name='WelcomeIconDivider',Position=UDim2.fromOffset(74,17),Size=UDim2.fromOffset(2,36),BackgroundColor3=Color3.fromRGB(143,145,152),BackgroundTransparency=.08,BorderSizePixel=0},profile)
+    local greeting=label(profile,'Добро пожаловать',88,10,1,50,26,true)
+    greeting.Name='WelcomeTitle'
+    greeting.Size=UDim2.new(1,-100,0,50)
+    local displayName=label(profile,player.DisplayName,164,88,1,44,34,true)
+    displayName.Size=UDim2.new(1,-176,0,44)
+    local username=label(profile,'@'..player.Name,164,135,1,32,23,false)
+    username.Size=UDim2.new(1,-176,0,32)
+    local glyphScale=new('UIScale',{Scale=1},glyph)
+    local function fitProfile()
+        local narrow=window.Size.X.Offset<650
+        glyph.Position=UDim2.fromOffset(narrow and 12 or 26,narrow and 18 or 17)
+        glyphScale.Scale=narrow and .67 or 1
+        separator.Position=UDim2.fromOffset(narrow and 44 or 74,narrow and 18 or 17)
+        separator.Size=UDim2.fromOffset(2,narrow and 25 or 36)
+        greeting.Position=UDim2.fromOffset(narrow and 54 or 88,10)
+        greeting.Size=UDim2.new(1,narrow and -64 or -100,0,narrow and 42 or 50)
+        greeting.TextSize=narrow and 16 or 26
+        avatar.Position=UDim2.fromOffset(narrow and 12 or 18,narrow and 82 or 74)
+        avatar.Size=UDim2.fromOffset(narrow and 72 or 120,narrow and 72 or 120)
+        displayName.Position=UDim2.fromOffset(narrow and 94 or 164,narrow and 85 or 88)
+        displayName.Size=UDim2.new(1,narrow and -104 or -176,0,narrow and 32 or 44)
+        displayName.TextSize=narrow and 19 or 34
+        username.Position=UDim2.fromOffset(narrow and 94 or 164,narrow and 120 or 135)
+        username.Size=UDim2.new(1,narrow and -104 or -176,0,narrow and 26 or 32)
+        username.TextSize=narrow and 14 or 23
+    end
+    local profileResize=window:GetPropertyChangedSignal('Size'):Connect(fitProfile)
+    profile.Destroying:Connect(function() profileResize:Disconnect() end)
+    fitProfile()
+end
 task.spawn(function() local ok,url=pcall(function() return Players:GetUserThumbnailAsync(player.UserId,Enum.ThumbnailType.HeadShot,Enum.ThumbnailSize.Size150x150) end); if ok and avatar.Parent then avatar.Image=url end end)
 local homeLibrary={refresh="refresh-cw",server="server",users="users-round",info="info",globe="globe"}
 local function homeIcon(parent,kind,x,y,size)
