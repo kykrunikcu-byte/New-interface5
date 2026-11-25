@@ -1257,10 +1257,11 @@ local defensePage=(function()
         {name='Защита от отбрасывания',heading='Защита от\nотбрасывания',desc='Защита от резкого отбрасывания.',key='shield',settings={'Уведомления','Восстановление управления'}},
         {name='Защита от падения под карту',heading='Защита от падения\nпод карту',desc='Защита от падения за пределы карты.',key='arrow-down',settings={'Уведомления','Возврат в безопасное место'}},
         {name='Бессмертие',heading='Бессмертие',desc='Функция пока не подключена.',key='heart',unavailable=true},
+        {name='Защита от посадки',heading='Защита от посадки',desc='Защита от нежелательной посадки.',key='person-standing',settings={'Обычные сиденья','Сиденья транспорта','Уведомления'},defaults={true,true,false}},
     }
     local states,cards,outlines={},{},{}
     for i,d in ipairs(defs) do
-        states[i]={enabled=false,checks={true,true}}
+        states[i]={enabled=false,checks=d.defaults or {true,true}}
         local b=avatarCard(canvas,'DefenseOption'..i,12,94+(i-1)*108,296,98,true)
         b.BackgroundColor3=C.slot
         cards[i]=b; outlines[i]=b:FindFirstChildOfClass('UIStroke')
@@ -1283,29 +1284,35 @@ local defensePage=(function()
     local summary=txt(detail,'Summary','Функция пока не подключена.',14,138,360,72,21,false,true,true)
     local current=1
     local checks={}
+    local settingsDivider=thin(settings,14,126,360)
     local function refreshChecks()
         local d=defs[current]
         if not d.settings then return end
         for i,c in ipairs(checks) do
-            local on=states[current].checks[i]
-            c.square.BackgroundColor3=on and selectedColor or C.content
-            c.mark.Visible=on
-            c.label.Text=d.settings[i]
+            local label=d.settings[i]
+            c.button.Visible=label~=nil
+            if label then
+                local on=states[current].checks[i]
+                c.square.BackgroundColor3=on and selectedColor or C.content
+                c.mark.Visible=on
+                c.label.Text=label
+            end
         end
+        settingsDivider.Position=UDim2.fromOffset(14,#d.settings==3 and 169 or 126)
+        notice.Position=UDim2.fromOffset(14,#d.settings==3 and 303 or 260)
     end
-    for i=1,2 do
+    for i=1,3 do
         local b=new('TextButton',{Name='Check'..i,Position=UDim2.fromOffset(14,36+(i-1)*43),Size=UDim2.fromOffset(360,40),BackgroundTransparency=1,Text='',AutoButtonColor=false},settings)
         local square=avatarCard(b,'Square',0,6,28,28,false)
         local mark=icon(square,'check',4,4,20)
         local label=txt(b,'Caption','',42,0,310,40,20,false,false,true)
-        checks[i]={square=square,mark=mark,label=label}
+        checks[i]={button=b,square=square,mark=mark,label=label}
         b.Activated:Connect(function()
-            if defs[current].unavailable then return end
+            if defs[current].unavailable or not defs[current].settings or not defs[current].settings[i] then return end
             states[current].checks[i]=not states[current].checks[i]
             refreshChecks()
         end)
     end
-    thin(settings,14,126,360)
     local function refresh(animate)
         local d,state=defs[current],states[current]
         if symbolIndex~=current then
