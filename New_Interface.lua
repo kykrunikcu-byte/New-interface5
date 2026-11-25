@@ -951,7 +951,6 @@ local function buildPlayerPage()
         {name='Гравитация',kind='down',desc='Изменение гравитации.',label='Гравитация',default=196.2,max=500,manualMax=100000},
         {name='Ходьба по стенам',kind='wall',desc='Передвижение по стенам.'},
         {name='Свободная камера',kind='camera',desc='Свободный обзор карты.',group='Утилиты',label='Скорость камеры',default=50,max=2000,sliderOnly=true},
-        {name='Бессмертие',kind='heart',desc='Функция пока не подключена.',unavailable=true},
     }
     local states, cards, outlines={}, {}, {}
     local list=new('ScrollingFrame',{Name='PlayerOptionsScroll',Position=UDim2.fromOffset(12,72),Size=UDim2.fromOffset(304,476),BackgroundTransparency=1,BorderSizePixel=0,CanvasSize=UDim2.fromOffset(0,0),ScrollingDirection=Enum.ScrollingDirection.Y,ScrollBarThickness=4,ScrollBarImageColor3=C.line,ClipsDescendants=true},canvas)
@@ -1230,6 +1229,115 @@ local function buildESPPage()
 end
 local espPage=buildESPPage()
 
+-- Defense page: same geometry and reusable controls as ESP; visual state only.
+local defensePage=(function()
+    local page=new('Frame',{Name='DefensePage',Size=UDim2.fromScale(1,1),BackgroundTransparency=1,Visible=false,ClipsDescendants=true},content)
+    local canvas=new('Frame',{Name='DefenseCanvas',AnchorPoint=Vector2.new(.5,0),Position=UDim2.fromScale(.5,0),Size=UDim2.fromOffset(720,595),BackgroundTransparency=1},page)
+    local scale=new('UIScale',{Scale=1},canvas)
+    local function fit()
+        local w,h=window.Size.X.Offset*.75,window.Size.Y.Offset-76
+        if w>0 and h>0 then scale.Scale=math.min(1,w/720,h/595) end
+    end
+    local resizeConnection=window:GetPropertyChangedSignal('Size'):Connect(fit)
+    page.Destroying:Connect(function() resizeConnection:Disconnect() end)
+    fit()
+    local function txt(p,name,value,x,y,w,h,size,bold,dim,wrap)
+        local t=avatarText(p,name,value,x,y,w,h,size,bold,false,dim)
+        if wrap then t.TextWrapped=true; t.TextTruncate=Enum.TextTruncate.None end
+        return t
+    end
+    local function icon(p,key,x,y,size,name)
+        return libraryIcon(p,key,UDim2.fromOffset(x,y),size,name or key..'Icon')
+    end
+    icon(canvas,'shield',16,16,50)
+    new('Frame',{Name='HeadingIconDivider',Position=UDim2.fromOffset(76,17),Size=UDim2.fromOffset(2,48),BackgroundColor3=Color3.fromRGB(143,145,152),BackgroundTransparency=.08,BorderSizePixel=0},canvas)
+    txt(canvas,'Heading','Защита',88,8,600,44,40,true,false).Font=Enum.Font.GothamBold
+    txt(canvas,'Subtitle','Безопасность персонажа',88,52,600,26,19,false,true)
+    local defs={
+        {name='Защита от отбрасывания',heading='Защита от\nотбрасывания',desc='Защита от резкого отбрасывания.',key='shield',settings={'Уведомления','Восстановление управления'}},
+        {name='Защита от падения под карту',heading='Защита от падения\nпод карту',desc='Защита от падения за пределы карты.',key='arrow-down',settings={'Уведомления','Возврат в безопасное место'}},
+        {name='Бессмертие',heading='Бессмертие',desc='Функция пока не подключена.',key='heart',unavailable=true},
+    }
+    local states,cards,outlines={},{},{}
+    for i,d in ipairs(defs) do
+        states[i]={enabled=false,checks={true,true}}
+        local b=avatarCard(canvas,'DefenseOption'..i,12,94+(i-1)*108,296,98,true)
+        b.BackgroundColor3=C.slot
+        cards[i]=b; outlines[i]=b:FindFirstChildOfClass('UIStroke')
+        icon(b,d.key,12,28,40)
+        txt(b,'Title',d.heading,62,5,222,45,i==3 and 23 or 20,true,false,true)
+        txt(b,'Description',d.desc,62,50,222,42,17,false,true,true)
+        b:SetAttribute('OptionIndex',i)
+    end
+    local detail=avatarCard(canvas,'DefenseSettings',320,94,388,470,false)
+    detail.BackgroundColor3=C.slot
+    local symbol,symbolIndex
+    local title=txt(detail,'Title','',62,8,220,52,23,true,false,true)
+    local description=txt(detail,'Description','',14,62,360,43,19,false,true,true)
+    local toggle=avatarCard(detail,'EnableToggle',294,20,80,36,true)
+    local showToggle=compactCheck(toggle,80,36)
+    thin(detail,14,112,360)
+    local settings=new('Frame',{Name='ProtectionSettings',Position=UDim2.fromOffset(0,122),Size=UDim2.new(1,0,1,-122),BackgroundTransparency=1},detail)
+    txt(settings,'SettingsTitle','Настройки защиты',14,0,360,32,21,true,false)
+    local notice=txt(detail,'PreviewNotice','Функции пока не подключены.',14,260,360,58,19,false,true,true)
+    local summary=txt(detail,'Summary','Функция пока не подключена.',14,138,360,72,21,false,true,true)
+    local current=1
+    local checks={}
+    local function refreshChecks()
+        local d=defs[current]
+        if not d.settings then return end
+        for i,c in ipairs(checks) do
+            local on=states[current].checks[i]
+            c.square.BackgroundColor3=on and selectedColor or C.content
+            c.mark.Visible=on
+            c.label.Text=d.settings[i]
+        end
+    end
+    for i=1,2 do
+        local b=new('TextButton',{Name='Check'..i,Position=UDim2.fromOffset(14,36+(i-1)*43),Size=UDim2.fromOffset(360,40),BackgroundTransparency=1,Text='',AutoButtonColor=false},settings)
+        local square=avatarCard(b,'Square',0,6,28,28,false)
+        local mark=icon(square,'check',4,4,20)
+        local label=txt(b,'Caption','',42,0,310,40,20,false,false,true)
+        checks[i]={square=square,mark=mark,label=label}
+        b.Activated:Connect(function()
+            if defs[current].unavailable then return end
+            states[current].checks[i]=not states[current].checks[i]
+            refreshChecks()
+        end)
+    end
+    thin(settings,14,126,360)
+    local function refresh(animate)
+        local d,state=defs[current],states[current]
+        if symbolIndex~=current then
+            if symbol then symbol:Destroy() end
+            symbol=icon(detail,d.key,14,14,40)
+            symbolIndex=current
+        end
+        title.Text=d.heading
+        description.Text=d.desc
+        for i,b in ipairs(cards) do
+            b.BackgroundColor3=i==current and selectedColor or C.slot
+            outlines[i].Transparency=i==current and .16 or .65
+        end
+        toggle.Visible=not d.unavailable
+        settings.Visible=not d.unavailable
+        notice.Visible=not d.unavailable
+        summary.Visible=d.unavailable==true
+        showToggle(state.enabled,animate==true)
+        refreshChecks()
+    end
+    for i,b in ipairs(cards) do
+        softPreview(b,function() current=i; refresh(false) end)
+    end
+    softPreview(toggle,function()
+        if defs[current].unavailable then return end
+        states[current].enabled=not states[current].enabled
+        refresh(true)
+    end)
+    refresh(false)
+    return page
+end)()
+
 
 local buttons = {}
 local navigationLabels = {}
@@ -1238,6 +1346,7 @@ local function selectTab(index)
     avatarPage.Visible = index == 2
     playerPage.Visible = index == 3
     espPage.Visible = index == 4
+    defensePage.Visible = index == 6
     overlay.Visible = false
     for i, button in ipairs(buttons) do
         button.BackgroundColor3 = i == index and Color3.fromRGB(75,77,84) or C.slot
