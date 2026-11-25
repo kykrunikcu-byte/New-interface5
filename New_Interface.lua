@@ -1282,6 +1282,44 @@ for i, name in ipairs(names) do
 end
 selectTab(1)
 
+-- Sidebar footer: flat, noninteractive branding and local UI status.
+-- Six navigation wrappers end at y=441 (12 + 6*64 + 5*9).
+do
+    local footer=new("Frame",{
+        Name="NavigationFooter", Position=UDim2.fromOffset(20,461),
+        Size=UDim2.new(1,-40,0,120), BackgroundTransparency=1,
+        BorderSizePixel=0, Active=false,
+    },sidebar)
+    new("Frame",{
+        Name="FooterDivider", Position=UDim2.fromOffset(0,0),
+        Size=UDim2.new(1,0,0,1), BackgroundColor3=C.line,
+        BackgroundTransparency=.12, BorderSizePixel=0,
+    },footer)
+    libraryIcon(footer,"info",UDim2.fromOffset(8,25),30,"FooterInfoIcon",muted)
+    local title=label(footer,"HORIZON UI 2.0",52,17,1,24,16,true)
+    title.Name="FooterTitle"
+    title.Size=UDim2.new(1,-52,0,24)
+    title.Font=Enum.Font.GothamMedium
+    local version=label(footer,"Версия: 2.0",52,42,1,22,14,false)
+    version.Name="FooterVersion"
+    version.Size=UDim2.new(1,-52,0,22)
+    libraryIcon(footer,"refresh-cw",UDim2.fromOffset(8,76),30,"FooterStatusIcon",muted)
+    local status=label(footer,"Статус: <font color=\"#79B96B\">Активен</font>",52,75,1,32,15,false)
+    status.Name="FooterStatus"
+    status.Size=UDim2.new(1,-52,0,32)
+    status.TextColor3=C.text
+    status.RichText=true
+    -- The status refers only to the currently mounted UI, not server safety.
+    -- Hide the decorative footer in the narrow portrait layout rather than clip text.
+    local function fitFooter()
+        local size=window.Size
+        footer.Visible=size.X.Offset>=800 and size.Y.Offset>=657
+    end
+    local footerResize=window:GetPropertyChangedSignal("Size"):Connect(fitFooter)
+    footer.Destroying:Connect(function() footerResize:Disconnect() end)
+    fitFooter()
+end
+
 -- Drag from the header on mouse or touch, without hijacking close/minimize taps.
 local dragging=false
 local dragStart
