@@ -1542,14 +1542,14 @@ do
         AnchorPoint=Vector2.new(0,.5),
         Position=UDim2.new(0,20,.5,0),
         Size=UDim2.fromOffset(58,58),
-        BackgroundColor3=C.outer,BorderSizePixel=0,
-        Text="H",TextColor3=C.text,Font=Enum.Font.GothamBold,TextSize=26,
+        BackgroundColor3=Color3.fromRGB(35,37,42),BorderSizePixel=0,
+        Text="H",TextColor3=C.text,Font=Enum.Font.GothamBold,TextSize=27,
         TextXAlignment=Enum.TextXAlignment.Center,
         TextYAlignment=Enum.TextYAlignment.Center,
         AutoButtonColor=false,Active=true,ZIndex=10,
     },gui)
-    corner(launcher,13)
-    stroke(launcher,C.line,.12,1.3).ApplyStrokeMode=Enum.ApplyStrokeMode.Border
+    corner(launcher,14)
+    stroke(launcher,Color3.fromRGB(121,129,143),.10,1.3).ApplyStrokeMode=Enum.ApplyStrokeMode.Border
 
     local function setWindowVisible(visible)
         collapsed=not visible
