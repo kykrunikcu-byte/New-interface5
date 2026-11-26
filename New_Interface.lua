@@ -59,20 +59,20 @@ local window = new("Frame", {
     Name="MainWindow", AnchorPoint=Vector2.new(.5,.5),
     Position=UDim2.fromScale(.5,.5), Size=UDim2.fromOffset(960,671),
     BackgroundColor3=C.outer, BorderSizePixel=0,
-    Active=true,
+    Active=true, Visible=false,
 }, gui)
 corner(window, 17)
 stroke(window, C.line, .22, 1.4)
 -- Adapt to landscape and smaller screens, while keeping aspect ratio.
 local uiScale=new("UIScale", {Scale=1}, window)
-local collapsed=false
+local collapsed=true
 local function resize()
     local camera=workspace.CurrentCamera
     local viewport=camera and camera.ViewportSize or Vector2.new(800,360)
     local width=viewport.X < 650 and 360 or 960
     local height=viewport.X < 650 and 771 or 671
     uiScale.Scale=math.min((viewport.X-20)/width,(viewport.Y-30)/height,1.42*1.05)
-    window.Size=UDim2.fromOffset(width,collapsed and 76 or height)
+    window.Size=UDim2.fromOffset(width,height)
 end
 resize()
 local viewportConnection
@@ -395,15 +395,9 @@ local function nativeSymbol(parent,key,size,name,tint)
     drawFallback(holder,key,size,tint or C.text)
     return holder
 end
-local function updateMinimizeSymbol()
-    local minus=minimize:FindFirstChild("MinimizeIcon")
-    local plus=minimize:FindFirstChild("RestoreIcon")
-    if minus and plus then minus.Visible=not collapsed; plus.Visible=collapsed end
-end
 do
     nativeSymbol(close,"x",24,"CloseIcon")
     nativeSymbol(minimize,"minus",24,"MinimizeIcon")
-    nativeSymbol(minimize,"plus",24,"RestoreIcon").Visible=false
 end
 local showToast
 do
@@ -1540,24 +1534,90 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-minimize.MouseButton1Click:Connect(function()
-    collapsed=not collapsed
-    body.Visible=not collapsed
-    overlay.Visible=false
-    updateMinimizeSymbol()
-    if collapsed then
-        local toast=window:FindFirstChild('HorizonProgressToast')
-        if toast then toast:Destroy() end
+-- Compact floating launcher. The main window keeps its full size and
+-- position; visibility is switched directly, without a transition.
+do
+    local launcher=new("TextButton",{
+        Name="HorizonFloatingButton",
+        AnchorPoint=Vector2.new(0,.5),
+        Position=UDim2.new(0,20,.5,0),
+        Size=UDim2.fromOffset(58,58),
+        BackgroundColor3=C.outer,BorderSizePixel=0,
+        Text="H",TextColor3=C.text,Font=Enum.Font.GothamBold,TextSize=26,
+        TextXAlignment=Enum.TextXAlignment.Center,
+        TextYAlignment=Enum.TextYAlignment.Center,
+        AutoButtonColor=false,Active=true,ZIndex=10,
+    },gui)
+    corner(launcher,13)
+    stroke(launcher,C.line,.12,1.3).ApplyStrokeMode=Enum.ApplyStrokeMode.Border
+
+    local function setWindowVisible(visible)
+        collapsed=not visible
+        dragging=false
+        dragInput=nil
+        dragStart=nil
+        overlay.Visible=false
+        if not visible then
+            local toast=window:FindFirstChild("HorizonProgressToast")
+            if toast then toast:Destroy() end
+        end
+        body.Visible=visible
+        window.Visible=visible
     end
-    local current=window.Size
-    if collapsed then
-        window:SetAttribute("ExpandedWidth",current.X.Offset)
-        window:SetAttribute("ExpandedHeight",current.Y.Offset)
-        window.Size=UDim2.fromOffset(current.X.Offset,76)
-    else
-        resize()
+
+    -- Match the original floating button's tap/drag distinction.
+    local pointer,origin,start,moved
+    local function place(x,y)
+        local bounds=gui.AbsoluteSize
+        local size=launcher.AbsoluteSize
+        if bounds.X<=0 or bounds.Y<=0 then return end
+        local half=size.Y/2
+        launcher.Position=UDim2.fromOffset(
+            math.clamp(x,0,math.max(0,bounds.X-size.X)),
+            math.clamp(y,math.min(half,bounds.Y/2),math.max(bounds.Y-half,bounds.Y/2)))
     end
-end)
+    launcher.InputBegan:Connect(function(input)
+        local kind=input.UserInputType
+        if kind~=Enum.UserInputType.Touch and kind~=Enum.UserInputType.MouseButton1 then return end
+        if pointer then return end
+        pointer=input
+        origin=input.Position
+        start=launcher.AbsolutePosition-gui.AbsolutePosition+Vector2.new(0,launcher.AbsoluteSize.Y/2)
+        moved=false
+    end)
+    local changed=UserInputService.InputChanged:Connect(function(input)
+        if not pointer then return end
+        if pointer.UserInputType==Enum.UserInputType.Touch then
+            if input~=pointer then return end
+        elseif input.UserInputType~=Enum.UserInputType.MouseMovement then return end
+        local delta=input.Position-origin
+        if not moved and delta.Magnitude<6 then return end
+        moved=true
+        place(start.X+delta.X,start.Y+delta.Y)
+    end)
+    local ended=UserInputService.InputEnded:Connect(function(input)
+        if pointer and (input==pointer or
+            (pointer.UserInputType==Enum.UserInputType.MouseButton1 and input.UserInputType==Enum.UserInputType.MouseButton1))then
+            pointer=nil
+        end
+    end)
+    local boundsChanged=gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+        local pos=launcher.AbsolutePosition-gui.AbsolutePosition
+        place(pos.X,pos.Y+launcher.AbsoluteSize.Y/2)
+    end)
+    launcher.Activated:Connect(function()
+        if not moved then setWindowVisible(not window.Visible) end
+    end)
+    minimize.Activated:Connect(function()
+        setWindowVisible(false)
+    end)
+    gui.Destroying:Connect(function()
+        changed:Disconnect()
+        ended:Disconnect()
+        boundsChanged:Disconnect()
+    end)
+    setWindowVisible(false)
+end
 -- v33: Classic Minimal confirmation. Separate overlay remains usable
 -- even when the main window is collapsed or dragged near the screen edge.
 do
