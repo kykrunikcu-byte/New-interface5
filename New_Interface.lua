@@ -1002,6 +1002,7 @@ local function buildPlayerPage()
         {name='Свободная камера',kind='camera',desc='Свободный обзор карты.',group='Утилиты',label='Скорость камеры',default=50,max=2000,sliderOnly=true},
         {name='Вращение',kind='reset',desc='Вращение персонажа вокруг своей оси.',label='Скорость вращения',default=360,max=2000,manualMax=1000000000000},
         {name='Быстрый телепорт',kind='teleport',desc='Быстрое перемещение влево и вправо.'},
+        {name='Поле зрения',kind='eye',desc='Регулирует угол обзора камеры (FOV).',label='Угол обзора (1–120°)',default=70,min=1,max=120,manualMax=120},
     }
     local states, cards, outlines={}, {}, {}
     local list=new('ScrollingFrame',{Name='PlayerOptionsScroll',Position=UDim2.fromOffset(12,72),Size=UDim2.fromOffset(304,476),BackgroundTransparency=1,BorderSizePixel=0,CanvasSize=UDim2.fromOffset(0,0),ScrollingDirection=Enum.ScrollingDirection.Y,ScrollBarThickness=4,ScrollBarImageColor3=C.line,ClipsDescendants=true},canvas)
@@ -1060,7 +1061,8 @@ local function buildPlayerPage()
     local function refreshValue()
         local d,s=defs[current],states[current]
         if not d.max then return end
-        local fraction=math.clamp(s.value/d.max,0,1)
+        local minimum=d.min or 0
+        local fraction=math.clamp((s.value-minimum)/(d.max-minimum),0,1)
         fill.Size=UDim2.fromScale(fraction,1); thumb.Position=UDim2.fromScale(fraction,.5)
         valueLabel.Text=tostring(s.value)
         local size=22
@@ -1112,7 +1114,7 @@ local function buildPlayerPage()
         local d,s=defs[current],states[current]
         if not d.max or d.sliderOnly or not d.manualMax then return end
         local n=tonumber(input.Text)
-        if n and n==n and n>=0 and n<=d.manualMax then
+        if n and n==n and n>=(d.min or 0) and n<=d.manualMax then
             s.value=math.floor(n+.5); s.manual=tostring(s.value)
             showToast('Значение принято')
         end
@@ -1121,7 +1123,8 @@ local function buildPlayerPage()
     local function setSlider(x)
         local d=defs[current]; if not d.max or rail.AbsoluteSize.X<=0 then return end
         local fraction=math.clamp((x-rail.AbsolutePosition.X)/rail.AbsoluteSize.X,0,1)
-        states[current].value=math.floor(fraction*d.max+.5)
+        local minimum=d.min or 0
+        states[current].value=math.floor(minimum+fraction*(d.max-minimum)+.5)
         refreshValue() -- Manual entry stays independent of slider movements.
     end
     touchTrack.InputBegan:Connect(function(event)
