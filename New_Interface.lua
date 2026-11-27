@@ -774,6 +774,8 @@ do
             {id="AntiAFK",title="Анти-AFK",description="Защита от отключения за бездействие.",icon="clock"},
             {id="AutoSave",title="Автосохранение",description="Сохранение и восстановление настроек всех функций.",icon="save"},
             {id="ShiftLock",title="Shift Lock Switch",description="Плавающая кнопка фиксации камеры.",icon="lock"},
+            {id="InfiniteJump",title="Бесконечный прыжок",description="Повторные прыжки в воздухе.",icon="arrow-up"},
+            {id="Swim",title="Плавать",description="Режим плавания персонажа.",icon="life-buoy"},
         }
         local firstY,step,height=566,88,76
         for i,definition in ipairs(definitions) do
