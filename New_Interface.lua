@@ -1129,6 +1129,7 @@ local function buildPlayerPage()
         {name='Вращение',kind='reset',desc='Вращение персонажа вокруг своей оси.',label='Скорость вращения',default=360,max=2000,manualMax=1000000000000},
         {name='Быстрый телепорт',kind='teleport',desc='Быстрое перемещение влево и вправо.'},
         {name='Поле зрения',kind='eye',desc='Регулирует угол обзора камеры (FOV).',label='Угол обзора',default=70,min=1,max=120,sliderOnly=true},
+        {name='Анти сидеть',kind='user',desc='Предотвращает автоматическую посадку персонажа.'},
     }
     local states, cards, outlines={}, {}, {}
     local list=new('ScrollingFrame',{Name='PlayerOptionsScroll',Position=UDim2.fromOffset(12,72),Size=UDim2.fromOffset(304,476),BackgroundTransparency=1,BorderSizePixel=0,CanvasSize=UDim2.fromOffset(0,0),ScrollingDirection=Enum.ScrollingDirection.Y,ScrollBarThickness=4,ScrollBarImageColor3=C.line,ClipsDescendants=true},canvas)
