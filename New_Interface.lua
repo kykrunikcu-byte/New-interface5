@@ -662,6 +662,8 @@ do
     note.Size=UDim2.new(1,-32,0,40); note.TextWrapped=true; note.TextTruncate=Enum.TextTruncate.None; note.ZIndex=22
     local function show(target,scale)
         modal.Visible=target==modal; picker.Visible=target==picker
+        local performance=overlay:FindFirstChild('PerformanceSettings')
+        if performance then performance.Visible=false end
         overlay.Visible=true; scale.Scale=.94
         if target==picker then
             list.CanvasPosition=Vector2.new(0,math.max(0,math.min((selected-1)*66,#options*66-10-list.AbsoluteWindowSize.Y)))
@@ -841,6 +843,126 @@ do
         home.CanvasSize=UDim2.fromOffset(0,firstY+(#definitions-1)*step+height+12)
     end
     buildHomeUtilities()
+end
+
+-- Home performance settings: independent UI preview; no graphics/gameplay writes.
+do
+    local card=panel(home,0,0,1,76,true)
+    card.Name="HomePerformanceCard"
+    card.Position=UDim2.fromOffset(12,830)
+    card.AutoButtonColor=false
+    local glyph=libraryIcon(card,"activity",UDim2.fromOffset(14,18),40,"PerformanceIcon")
+    local glyphScale=new("UIScale",{Scale=1},glyph)
+    local title=label(card,"Производительность",64,7,1,28,23,true)
+    title.Name="Title"; title.Size=UDim2.new(1,-100,0,28)
+    local description=label(card,"Настройка графики и оптимизация.",64,35,1,34,17,false)
+    description.Name="Description"; description.Size=UDim2.new(1,-100,0,34)
+    description.TextWrapped=true; description.TextTruncate=Enum.TextTruncate.None
+    libraryIcon(card,"chevron-right",UDim2.new(1,-35,.5,-11),22,"OpenSettingsIcon")
+    home.CanvasSize=UDim2.fromOffset(0,918)
+
+    local dialog=new("Frame",{Name="PerformanceSettings",AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(540,440),BackgroundColor3=C.outer,BorderSizePixel=0,Visible=false,Active=true,ZIndex=21},overlay)
+    corner(dialog,14); stroke(dialog,C.line,.25,1)
+    local scale=new("UIScale",{Scale=1},dialog)
+    local function fit()
+        local narrow=window.Size.X.Offset<650
+        glyph.Position=UDim2.fromOffset(narrow and 8 or 14,18)
+        glyphScale.Scale=narrow and .7 or 1
+        title.Position=UDim2.fromOffset(narrow and 42 or 64,7)
+        title.Size=UDim2.new(1,narrow and -78 or -100,0,28)
+        title.TextSize=narrow and 15 or 23
+        description.Position=UDim2.fromOffset(narrow and 42 or 64,35)
+        description.Size=UDim2.new(1,narrow and -78 or -100,0,34)
+        description.TextSize=narrow and 11 or 17
+        local w,h=window.AbsoluteSize.X,window.AbsoluteSize.Y
+        if w>0 and h>0 then scale.Scale=math.min(1,w*.94/540,h*.94/440) end
+    end
+    local resize=window:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
+    dialog.Destroying:Connect(function() resize:Disconnect() end)
+    fit()
+    libraryIcon(dialog,"activity",UDim2.fromOffset(16,14),40,"HeadingIcon")
+    new("Frame",{Position=UDim2.fromOffset(64,14),Size=UDim2.fromOffset(1,40),BackgroundColor3=C.line,BorderSizePixel=0},dialog)
+    avatarText(dialog,"Title","Производительность",76,8,386,32,26,true,false,false)
+    avatarText(dialog,"Description","Клиентская оптимизация графики",76,40,386,22,17,false,false,true)
+    local closeButton=avatarCard(dialog,"ClosePerformance",480,12,44,44,true)
+    libraryIcon(closeButton,"x",UDim2.fromOffset(11,11),22,"CloseIcon")
+    thin(dialog,16,70,508)
+    avatarText(dialog,"ModeHeading","Режим оптимизации",16,76,508,26,20,true,false,false)
+
+    local definitions={
+        {id="Shadows",title="Отключить тени"},
+        {id="Particles",title="Отключить частицы"},
+        {id="DynamicLights",title="Отключить динамический свет"},
+        {id="Materials",title="Упростить материалы"},
+        {id="Textures",title="Скрыть текстуры карты"},
+        {id="Reflections",title="Отключить отражения"},
+        {id="PostProcessing",title="Отключить постобработку"},
+        {id="Water",title="Упростить воду"},
+        {id="Grass",title="Убрать декоративную траву"},
+        {id="HorizonEffects",title="Оптимизировать эффекты HORIZON"},
+    }
+    local presets={
+        {name="Обычный",values={false,false,false,false,false,false,false,false,false,false}},
+        {name="Баланс",values={true,true,false,false,false,false,true,false,false,true}},
+        {name="Макс. FPS",values={true,true,true,true,true,true,true,true,true,true}},
+    }
+    local modeButtons,states,toggles,paints={},{},{},{}
+    for i=1,#definitions do states[i]=false end
+    local summary=avatarText(dialog,"EnabledCount","",16,386,310,40,18,false,false,true)
+    local reset=avatarCard(dialog,"ResetPerformance",359,384,165,42,true)
+    reset.BackgroundColor3=selectedColor
+    libraryIcon(reset,"refresh-cw",UDim2.fromOffset(12,10),22,"ResetIcon")
+    avatarText(reset,"Caption","Сброс",42,0,115,42,19,true,false,false)
+    local list=new("ScrollingFrame",{Name="PerformanceOptionsScroll",Position=UDim2.fromOffset(16,158),Size=UDim2.fromOffset(508,206),BackgroundTransparency=1,BorderSizePixel=0,CanvasSize=UDim2.fromOffset(0,#definitions*54-6),ScrollingDirection=Enum.ScrollingDirection.Y,ScrollBarThickness=4,ScrollBarImageColor3=C.line,ClipsDescendants=true},dialog)
+    local function refresh(animate)
+        local count,matching=0,nil
+        for i,on in ipairs(states) do
+            if on then count=count+1 end
+            toggles[i]:SetAttribute("PreviewEnabled",on)
+            paints[i](on,animate)
+        end
+        for i,preset in ipairs(presets) do
+            local equal=true
+            for j,on in ipairs(states) do if on~=preset.values[j] then equal=false; break end end
+            if equal then matching=i end
+            modeButtons[i].BackgroundColor3=equal and selectedColor or C.slot
+            modeButtons[i]:FindFirstChildOfClass("UIStroke").Transparency=equal and .16 or .65
+        end
+        dialog:SetAttribute("PreviewMode",matching and presets[matching].name or "Пользовательский")
+        summary.Text="Включено: "..count.." из "..#definitions
+    end
+    local function applyPreset(index)
+        for i,on in ipairs(presets[index].values) do states[i]=on end
+        refresh(true)
+    end
+    for i,preset in ipairs(presets) do
+        local b=avatarCard(dialog,"Preset"..i,16+(i-1)*172,108,164,42,true)
+        b.BackgroundColor3=C.slot
+        avatarText(b,"Caption",preset.name,4,0,156,42,19,true,true,false)
+        modeButtons[i]=b
+        softPreview(b,function() applyPreset(i) end)
+    end
+    for i,definition in ipairs(definitions) do
+        local row=avatarCard(list,definition.id,0,(i-1)*54,500,48,false)
+        row.BackgroundColor3=C.slot
+        local name=avatarText(row,"Title",definition.title,12,0,386,48,19,false,false,false)
+        name.TextWrapped=true; name.TextTruncate=Enum.TextTruncate.None
+        local toggle=avatarCard(row,"Toggle",408,6,80,36,true)
+        toggles[i]=toggle; paints[i]=compactCheck(toggle,80,36)
+        softPreview(toggle,function() states[i]=not states[i]; refresh(true) end)
+        if i<#definitions then thin(list,50,(i-1)*54+50,400) end
+    end
+    thin(dialog,16,375,508)
+    refresh(false)
+    softPreview(reset,function() applyPreset(1); showToast("Настройки сброшены") end)
+    softPreview(closeButton,function() overlay.Visible=false end)
+    softPreview(card,function()
+        modal.Visible=false
+        local picker=overlay:FindFirstChild("LanguagePicker")
+        if picker then picker.Visible=false end
+        dialog.Visible=true; overlay.Visible=true
+        fit()
+    end)
 end
 
 -- Existing Soft Press animation, without replacing the control callbacks.
