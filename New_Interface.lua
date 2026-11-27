@@ -972,23 +972,199 @@ end
 -- Existing Soft Press animation, without replacing the control callbacks.
 softPreview(minimize)
 softPreview(close)
-local tabAvatar=avatarCard(avatarCanvas,'AvatarTab',12,12,344,46,true)
-local tabOutfits=avatarCard(avatarCanvas,'OutfitsTab',364,12,344,46,true)
-avatarIcon(tabAvatar,'user',120,10,26); avatarText(tabAvatar,'Caption','Аватар',154,0,120,46,21,true,false,false)
-avatarIcon(tabOutfits,'hanger',112,10,26); avatarText(tabOutfits,'Caption','Наряды',146,0,130,46,21,true,false,false)
+-- Avatar tabs: animation catalogue shell, without character or asset operations.
 local avatarBody=new('Frame',{Name='AvatarColumns',Position=UDim2.fromOffset(12,70),Size=UDim2.fromOffset(696,513),BackgroundTransparency=1},avatarCanvas)
 local outfitsBody=avatarCard(avatarCanvas,'OutfitsPlaceholder',12,70,696,501,false)
-outfitsBody.Visible=false
 avatarText(outfitsBody,'Caption','Наряды',16,8,660,42,22,true,false,false)
 thin(outfitsBody,12,54,672)
-local function selectAvatarTab(outfits)
-    avatarBody.Visible=not outfits; outfitsBody.Visible=outfits
-    tabAvatar.BackgroundColor3=outfits and C.slot or selectedColor
-    tabOutfits.BackgroundColor3=outfits and selectedColor or C.slot
+do
+    local body=avatarCard(avatarCanvas,'AnimationCatalog',12,70,696,501,false)
+    local tabs={}
+    local pages={avatarBody,outfitsBody,body}
+    local settings,dialog
+    local function selectAvatarTab(index)
+        for i,p in ipairs(pages) do
+            p.Visible=i==index
+            tabs[i].BackgroundColor3=i==index and selectedColor or C.slot
+        end
+        if settings then settings.Visible=false end
+        if dialog then dialog.Visible=false end
+    end
+    for i,d in ipairs({{'user','Аватар'},{'hanger','Наряды'},{'motion','Анимация'}}) do
+        local b=avatarCard(avatarCanvas,({'AvatarTab','OutfitsTab','AnimationTab'})[i],12+(i-1)*235,12,226,46,true)
+        tabs[i]=b
+        avatarIcon(b,d[1],40,10,26)
+        avatarText(b,'Caption',d[2],72,0,148,46,21,true,false,false)
+        softPreview(b,function() selectAvatarTab(i) end)
+    end
+    local function button(parent,name,title,x,y,w,h,callback)
+        local b=avatarCard(parent,name,x,y,w,h,true)
+        b.BackgroundColor3=C.slot
+        if title then avatarText(b,'Caption',title,4,0,w-8,h,19,true,true,false) end
+        softPreview(b,callback)
+        return b
+    end
+    local function glyph(parent,key,x,y,size)
+        return libraryIcon(parent,key,UDim2.fromOffset(x,y),size,key..'Icon')
+    end
+    local mode,favMode,category=1,1,1
+    local nav,subnav,categoryButtons={},{},{}
+    local categories={'Все анимации','Бездействия','Ходьба','Бег','Прыжок','Лазанья','Плавание','Падение'}
+    local refresh
+    for i,title in ipairs({'Анимации','Эмоции','Избранное'}) do
+        nav[i]=button(body,'CatalogTab'..i,title,12+(i-1)*209,12,201,42,function()
+            mode=i
+            settings.Visible=false
+            dialog.Visible=false
+            refresh()
+        end)
+    end
+    local menu=button(body,'AnimationSettings',nil,639,12,45,42,function()
+        if mode==1 then settings.Visible=not settings.Visible end
+    end)
+    glyph(menu,'menu',11,9,24)
+    local searchBg=avatarCard(body,'SearchBackground',12,62,672,38,false)
+    searchBg.BackgroundColor3=C.content
+    glyph(searchBg,'search',9,8,22)
+    local search=new('TextBox',{Name='SearchAnimations',Position=UDim2.fromOffset(38,0),Size=UDim2.fromOffset(624,38),BackgroundTransparency=1,Text='',PlaceholderText='Поиск анимаций...',PlaceholderColor3=muted,TextColor3=C.text,Font=Enum.Font.Gotham,TextSize=19,TextXAlignment=Enum.TextXAlignment.Left,ClearTextOnFocus=false},searchBg)
+    local sub=new('Frame',{Name='FavoriteTabs',Position=UDim2.fromOffset(12,108),Size=UDim2.fromOffset(672,38),BackgroundTransparency=1},body)
+    for i,title in ipairs({'Анимации','Эмоции','Мои наборы'}) do
+        subnav[i]=button(sub,'FavoriteTab'..i,title,(i-1)*226,0,220,38,function() favMode=i; dialog.Visible=false; refresh() end)
+    end
+    local setsHeader=new('Frame',{Name='SetsHeader',Position=UDim2.fromOffset(12,154),Size=UDim2.fromOffset(672,42),BackgroundTransparency=1},body)
+    local countLabel=avatarText(setsHeader,'Count','Сохранённые наборы: 0',4,0,610,42,19,false,false,true)
+    local list=new('ScrollingFrame',{Name='CatalogGrid',Position=UDim2.fromOffset(12,108),Size=UDim2.fromOffset(672,381),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=4,CanvasSize=UDim2.fromOffset(0,0),AutomaticCanvasSize=Enum.AutomaticSize.Y},body)
+    local sampleNames={'Cartoony','Ninja','Robot','Stylish','Zombie','Levitation'}
+    local sets={}
+    local favorites={}
+    local editing
+    local nameInput,dialogTitle,confirmText,confirmButton
+    local function openDialog(index)
+        editing=index
+        nameInput.Text=index and sets[index] or ''
+        dialogTitle.Text=index and 'Переименование набора' or 'Сохранение набора'
+        confirmText.Text=index and 'Введите новое название набора' or 'Сохранить текущий набор анимаций?'
+        dialog.Visible=true
+    end
+    local add=button(setsHeader,'AddSet',nil,628,0,44,42,function() openDialog(nil) end)
+    glyph(add,'plus',10,9,24)
+    settings=avatarCard(body,'CategorySettings',348,58,336,422,false)
+    settings.BackgroundColor3=C.header
+    settings.ZIndex=10
+    avatarText(settings,'Title','Настройки анимаций',12,4,270,38,21,true,false,false)
+    local settingsClose=button(settings,'CloseSettings',nil,288,5,38,36,function() settings.Visible=false end)
+    glyph(settingsClose,'x',8,7,22)
+    thin(settings,12,45,312)
+    for i,title in ipairs(categories) do
+        local b=button(settings,'Category'..i,nil,10,53+(i-1)*45,316,40,function()
+            category=i
+            settings.Visible=false
+            refresh()
+        end)
+        glyph(b,({'layers','person-standing','footprints','run','arrow-up','mountain','waves','arrow-down'})[i],10,8,24)
+        avatarText(b,'Caption',title,44,0,238,40,19,false,false,false)
+        local mark=libraryIcon(b,'check',UDim2.fromOffset(284,9),22,'SelectedCheck',Color3.fromRGB(133,201,148))
+        categoryButtons[i]={button=b,mark=mark}
+    end
+    settings.Visible=false
+    dialog=avatarCard(body,'SetDialog',108,120,480,246,false)
+    dialog.BackgroundColor3=C.header
+    dialog.ZIndex=12
+    glyph(dialog,'save',14,14,26)
+    dialogTitle=avatarText(dialog,'Title','Сохранение набора',50,6,380,42,22,true,false,false)
+    local closeDialog=button(dialog,'CloseDialog',nil,432,8,38,38,function() dialog.Visible=false end)
+    glyph(closeDialog,'x',8,8,22)
+    thin(dialog,12,52,456)
+    confirmText=avatarText(dialog,'Question','Сохранить текущий набор анимаций?',14,60,452,36,19,false,false,false)
+    avatarText(dialog,'NameLabel','Название набора',14,99,452,26,18,false,false,true)
+    local inputBg=avatarCard(dialog,'NameBackground',14,128,452,44,false)
+    inputBg.BackgroundColor3=C.content
+    nameInput=new('TextBox',{Name='SetName',Position=UDim2.fromOffset(10,0),Size=UDim2.fromOffset(432,44),BackgroundTransparency=1,Text='',PlaceholderText='Введите название...',PlaceholderColor3=muted,TextColor3=C.text,Font=Enum.Font.Gotham,TextSize=20,TextXAlignment=Enum.TextXAlignment.Left,ClearTextOnFocus=false},inputBg)
+    button(dialog,'Cancel','Нет',14,188,220,44,function() dialog.Visible=false end)
+    confirmButton=button(dialog,'Save','Сохранить',246,188,220,44,function()
+        local name=nameInput.Text:match('^%s*(.-)%s*$')
+        if name=='' then return end
+        if editing then sets[editing]=name else table.insert(sets,name) end
+        dialog.Visible=false
+        refresh()
+    end)
+    confirmButton.BackgroundColor3=selectedColor
+    dialog.Visible=false
+    local function empty(message)
+        local t=avatarText(list,'Empty',message,0,28,660,48,20,false,true,true)
+        t.TextWrapped=true
+    end
+    refresh=function()
+        for i,b in ipairs(nav) do b.BackgroundColor3=i==mode and selectedColor or C.slot end
+        for i,b in ipairs(subnav) do b.BackgroundColor3=i==favMode and selectedColor or C.slot end
+        for i,d in ipairs(categoryButtons) do
+            d.button.BackgroundColor3=i==category and selectedColor or C.slot
+            d.mark.Visible=i==category
+        end
+        menu.Visible=mode==1
+        sub.Visible=mode==3
+        setsHeader.Visible=mode==3 and favMode==3
+        searchBg.Visible=not setsHeader.Visible
+        search.PlaceholderText=mode==2 and 'Поиск эмоций...' or 'Поиск анимаций...'
+        countLabel.Text='Сохранённые наборы: '..#sets
+        for _,child in ipairs(list:GetChildren()) do child:Destroy() end
+        list.CanvasPosition=Vector2.new(0,0)
+        local y=mode==3 and (favMode==3 and 204 or 154) or 108
+        list.Position=UDim2.fromOffset(12,y)
+        list.Size=UDim2.fromOffset(672,489-y)
+        if mode==3 and favMode==3 then
+            new('UIListLayout',{Padding=UDim.new(0,8),SortOrder=Enum.SortOrder.LayoutOrder},list)
+            if #sets==0 then empty('Нет сохранённых наборов') end
+            for i,name in ipairs(sets) do
+                local row=avatarCard(list,'Set'..i,0,0,660,58,false)
+                row.LayoutOrder=i; row.BackgroundColor3=C.slot
+                glyph(row,'layers',12,15,28)
+                avatarText(row,'Name',name,52,0,500,58,21,true,false,false)
+                local rename=button(row,'Rename',nil,558,8,44,42,function() openDialog(i) end)
+                glyph(rename,'pencil',11,10,22)
+                local remove
+                remove=button(row,'Remove',nil,608,8,44,42,function()
+                    if remove:GetAttribute('Confirm') then
+                        table.remove(sets,i); refresh()
+                    else
+                        remove:SetAttribute('Confirm',true)
+                        remove.BackgroundColor3=Color3.fromRGB(105,65,69)
+                        task.delay(3,function()
+                            if remove.Parent then remove:SetAttribute('Confirm',false); remove.BackgroundColor3=C.slot end
+                        end)
+                    end
+                end)
+                glyph(remove,'trash-2',11,10,22)
+            end
+            return
+        end
+        if mode==2 or (mode==3 and favMode==2) then empty(mode==2 and 'Каталог эмоций пока не подключён' or 'Нет избранных эмоций'); return end
+        local query=string.lower(search.Text)
+        new('UIGridLayout',{CellSize=UDim2.fromOffset(214,172),CellPadding=UDim2.fromOffset(8,8),SortOrder=Enum.SortOrder.LayoutOrder,FillDirectionMaxCells=3},list)
+        local visibleCount=0
+        for i,name in ipairs(sampleNames) do
+            if (mode==1 or favorites[i]) and (query=='' or string.find(string.lower(name),query,1,true)) then
+                visibleCount=visibleCount+1
+                local tile=avatarCard(list,'AnimationCard'..i,0,0,214,172,false)
+                tile.LayoutOrder=i; tile.BackgroundColor3=C.slot
+                local preview=button(tile,'Preview',nil,5,5,204,130,nil)
+                preview.BackgroundColor3=C.content
+                glyph(preview,'person-standing',53,16,98)
+                avatarText(tile,'Name',name,9,137,163,34,19,false,false,false)
+                local star=button(tile,'Favorite',nil,177,137,32,30,function() favorites[i]=not favorites[i]; refresh() end)
+                glyph(star,favorites[i] and 'check' or 'star',5,4,22)
+            end
+        end
+        if visibleCount==0 then
+            local layout=list:FindFirstChildOfClass('UIGridLayout')
+            if layout then layout:Destroy() end
+            empty(mode==3 and 'Нет избранных анимаций' or 'Ничего не найдено')
+        end
+    end
+    search:GetPropertyChangedSignal('Text'):Connect(refresh)
+    refresh()
+    selectAvatarTab(1)
 end
-softPreview(tabAvatar,function() selectAvatarTab(false) end)
-softPreview(tabOutfits,function() selectAvatarTab(true) end)
-selectAvatarTab(false)
 -- Equal-height columns: 180 + 304 + 196, with 8px gaps.
 local playerPanel=avatarCard(avatarBody,'PlayerPanel',0,0,180,447,false)
 local viewerPanel=avatarCard(avatarBody,'ViewerPanel',188,0,304,447,false)
