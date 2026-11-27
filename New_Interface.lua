@@ -1130,6 +1130,7 @@ local function buildPlayerPage()
         {name='Быстрый телепорт',kind='teleport',desc='Быстрое перемещение влево и вправо.'},
         {name='Поле зрения',kind='eye',desc='Регулирует угол обзора камеры (FOV).',label='Угол обзора',default=70,min=1,max=120,sliderOnly=true},
         {name='Анти сидеть',kind='user',desc='Предотвращает автоматическую посадку персонажа.'},
+        {name='Сидеть',kind='user',desc='Позволяет персонажу сесть в любом месте.'},
     }
     local states, cards, outlines={}, {}, {}
     local list=new('ScrollingFrame',{Name='PlayerOptionsScroll',Position=UDim2.fromOffset(12,72),Size=UDim2.fromOffset(304,476),BackgroundTransparency=1,BorderSizePixel=0,CanvasSize=UDim2.fromOffset(0,0),ScrollingDirection=Enum.ScrollingDirection.Y,ScrollBarThickness=4,ScrollBarImageColor3=C.line,ClipsDescendants=true},canvas)
