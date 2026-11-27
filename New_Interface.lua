@@ -774,8 +774,6 @@ do
             {id="AntiAFK",title="Анти-AFK",description="Защита от отключения за бездействие.",icon="clock"},
             {id="AutoSave",title="Автосохранение",description="Сохранение и восстановление настроек всех функций.",icon="save"},
             {id="ShiftLock",title="Shift Lock Switch",description="Плавающая кнопка фиксации камеры.",icon="lock"},
-            {id="InfiniteJump",title="Бесконечный прыжок",description="Повторные прыжки в воздухе.",icon="arrow-up"},
-            {id="Swim",title="Плавать",description="Режим плавания персонажа.",icon="life-buoy"},
         }
         local firstY,step,height=566,88,76
         for i,definition in ipairs(definitions) do
@@ -985,7 +983,7 @@ local function buildPlayerPage()
         if wrap then t.TextWrapped=true; t.TextTruncate=Enum.TextTruncate.None end
         return t
     end
-    local playerLibrary={cube="box",motion="run",user="user-round",wing="feather",up="arrow-up",down="arrow-down",wall="wall",camera="camera",heart="heart",eye="eye",play="play",reset="refresh-cw"}
+    local playerLibrary={cube="box",motion="run",user="user-round",wing="feather",up="arrow-up",down="arrow-down",wall="wall",swim="life-buoy",camera="camera",heart="heart",eye="eye",play="play",reset="refresh-cw"}
     local function icon(p,kind,x,y,size)
         return libraryIcon(p,playerLibrary[kind],UDim2.fromOffset(x,y),size,kind.."Icon")
     end
@@ -999,6 +997,8 @@ local function buildPlayerPage()
         {name='Прыжок',kind='up',desc='Изменяет высоту прыжка.',label='Высота прыжка',default=50,max=150,manualMax=1000},
         {name='Гравитация',kind='down',desc='Изменение гравитации.',label='Гравитация',default=196.2,max=500,manualMax=100000},
         {name='Ходьба по стенам',kind='wall',desc='Передвижение по стенам.'},
+        {name='Бесконечный прыжок',kind='up',desc='Повторные прыжки в воздухе.'},
+        {name='Плавать',kind='swim',desc='Режим плавания персонажа.'},
         {name='Свободная камера',kind='camera',desc='Свободный обзор карты.',group='Утилиты',label='Скорость камеры',default=50,max=2000,sliderOnly=true},
     }
     local states, cards, outlines={}, {}, {}
