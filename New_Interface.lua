@@ -983,7 +983,7 @@ local function buildPlayerPage()
         if wrap then t.TextWrapped=true; t.TextTruncate=Enum.TextTruncate.None end
         return t
     end
-    local playerLibrary={cube="box",motion="run",user="user-round",wing="feather",up="arrow-up",down="arrow-down",wall="wall",swim="life-buoy",camera="camera",heart="heart",eye="eye",play="play",reset="refresh-cw"}
+    local playerLibrary={cube="box",motion="run",user="user-round",wing="feather",up="arrow-up",down="arrow-down",wall="wall",swim="life-buoy",teleport="move",camera="camera",heart="heart",eye="eye",play="play",reset="refresh-cw"}
     local function icon(p,kind,x,y,size)
         return libraryIcon(p,playerLibrary[kind],UDim2.fromOffset(x,y),size,kind.."Icon")
     end
@@ -1001,6 +1001,7 @@ local function buildPlayerPage()
         {name='Плавать',kind='swim',desc='Режим плавания персонажа.'},
         {name='Свободная камера',kind='camera',desc='Свободный обзор карты.',group='Утилиты',label='Скорость камеры',default=50,max=2000,sliderOnly=true},
         {name='Вращение',kind='reset',desc='Вращение персонажа вокруг своей оси.',label='Скорость вращения',default=360,max=2000,manualMax=1000000000000},
+        {name='Быстрый телепорт',kind='teleport',desc='Быстрое перемещение влево и вправо.'},
     }
     local states, cards, outlines={}, {}, {}
     local list=new('ScrollingFrame',{Name='PlayerOptionsScroll',Position=UDim2.fromOffset(12,72),Size=UDim2.fromOffset(304,476),BackgroundTransparency=1,BorderSizePixel=0,CanvasSize=UDim2.fromOffset(0,0),ScrollingDirection=Enum.ScrollingDirection.Y,ScrollBarThickness=4,ScrollBarImageColor3=C.line,ClipsDescendants=true},canvas)
