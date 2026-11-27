@@ -1002,7 +1002,7 @@ local function buildPlayerPage()
         {name='Свободная камера',kind='camera',desc='Свободный обзор карты.',group='Утилиты',label='Скорость камеры',default=50,max=2000,sliderOnly=true},
         {name='Вращение',kind='reset',desc='Вращение персонажа вокруг своей оси.',label='Скорость вращения',default=360,max=2000,manualMax=1000000000000},
         {name='Быстрый телепорт',kind='teleport',desc='Быстрое перемещение влево и вправо.'},
-        {name='Поле зрения',kind='eye',desc='Регулирует угол обзора камеры (FOV).',label='Угол обзора (1–120°)',default=70,min=1,max=120,manualMax=120},
+        {name='Поле зрения',kind='eye',desc='Регулирует угол обзора камеры (FOV).',label='Угол обзора',default=70,min=1,max=120,sliderOnly=true},
     }
     local states, cards, outlines={}, {}, {}
     local list=new('ScrollingFrame',{Name='PlayerOptionsScroll',Position=UDim2.fromOffset(12,72),Size=UDim2.fromOffset(304,476),BackgroundTransparency=1,BorderSizePixel=0,CanvasSize=UDim2.fromOffset(0,0),ScrollingDirection=Enum.ScrollingDirection.Y,ScrollBarThickness=4,ScrollBarImageColor3=C.line,ClipsDescendants=true},canvas)
@@ -1091,6 +1091,8 @@ local function buildPlayerPage()
         local sliderOnly=d.sliderOnly==true
         manualHeading.Visible=not sliderOnly; inputBg.Visible=not sliderOnly
         rangeMin.Visible=sliderOnly; rangeMax.Visible=sliderOnly
+        rangeMin.Text=tostring(d.min or 0)
+        rangeMax.Text=tostring(d.max or 0)
         note.Position=UDim2.fromOffset(0,sliderOnly and 121 or 193)
         noSettings.Text=d.unavailable and 'Функция пока не подключена.' or 'Дополнительных настроек нет.'
         fieldTitle.Text=d.label or ''; input.Text=s.manual
