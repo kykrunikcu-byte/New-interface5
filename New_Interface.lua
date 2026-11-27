@@ -1285,7 +1285,7 @@ local function buildPlayerPage()
         if wrap then t.TextWrapped=true; t.TextTruncate=Enum.TextTruncate.None end
         return t
     end
-    local playerLibrary={cube="box",motion="run",user="user-round",wing="feather",up="arrow-up",down="arrow-down",wall="wall",swim="life-buoy",teleport="move",camera="camera",heart="heart",eye="eye",play="play",reset="refresh-cw"}
+    local playerLibrary={cube="box",motion="run",user="user-round",wing="feather",up="arrow-up",down="arrow-down",wall="wall",swim="life-buoy",teleport="move",camera="camera",heart="heart",eye="eye",play="play",reset="refresh-cw",tornado="tornado"}
     local function icon(p,kind,x,y,size)
         return libraryIcon(p,playerLibrary[kind],UDim2.fromOffset(x,y),size,kind.."Icon")
     end
@@ -1304,6 +1304,7 @@ local function buildPlayerPage()
         {name='Свободная камера',kind='camera',desc='Свободный обзор карты.',group='Утилиты',label='Скорость камеры',default=50,max=2000,sliderOnly=true},
         {name='Вращение',kind='reset',desc='Вращение персонажа вокруг своей оси.',label='Скорость вращения',default=360,max=2000,manualMax=1000000000000},
         {name='Быстрый телепорт',kind='teleport',desc='Быстрое перемещение влево и вправо.'},
+        {name='Торнадо',kind='tornado',desc='Режим торнадо.',unavailable=true},
         {name='Поле зрения',kind='eye',desc='Регулирует угол обзора камеры (FOV).',label='Угол обзора',default=70,min=1,max=120,sliderOnly=true},
         {name='Анти сидеть',kind='user',desc='Предотвращает автоматическую посадку персонажа.'},
         {name='Сидеть',kind='user',desc='Позволяет персонажу сесть в любом месте.'},
