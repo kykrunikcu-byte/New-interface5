@@ -874,15 +874,14 @@ do
         description.Position=UDim2.fromOffset(narrow and 42 or 64,35)
         description.Size=UDim2.new(1,narrow and -78 or -100,0,34)
         description.TextSize=narrow and 11 or 17
-        local w,h=window.AbsoluteSize.X,window.AbsoluteSize.Y
-        if w>0 and h>0 then
-            -- Enlarge this dialog by 25%, without exceeding its parent's logical bounds.
-            local preferred=math.min(1,w*.94/540,h*.94/440)*1.25
-            local logicalWidth,logicalHeight=window.Size.X.Offset,window.Size.Y.Offset
-            scale.Scale=math.min(preferred,logicalWidth*.94/540,logicalHeight*.90/440)
+        -- The main window already applies UIScale to all descendants.
+        -- Fit in its unscaled layout units to avoid shrinking this dialog twice.
+        local logicalWidth,logicalHeight=window.Size.X.Offset,window.Size.Y.Offset
+        if logicalWidth>0 and logicalHeight>0 then
+            scale.Scale=math.min(1,logicalWidth*.94/540,logicalHeight*.90/440)
         end
     end
-    local resize=window:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
+    local resize=window:GetPropertyChangedSignal("Size"):Connect(fit)
     dialog.Destroying:Connect(function() resize:Disconnect() end)
     fit()
     libraryIcon(dialog,"activity",UDim2.fromOffset(16,14),40,"HeadingIcon")
